@@ -1,4 +1,14 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(npx expo *)",
+      "Bash(npm install *)",
+      "Bash(node -e \"const ip = require\\('./node_modules/expo-image-picker/build/ImagePicker.js'\\); console.log\\(Object.keys\\(ip\\).filter\\(k => k.toLowerCase\\(\\).includes\\('media'\\)\\)\\)\")",
+      "Bash(git -C \"c:\\\\Users\\\\omar_\\\\valmak-app\" status --short)",
+      "Bash(git -C \"c:\\\\Users\\\\omar_\\\\valmak-app\" log --oneline -3)",
+      "Bash(git -C \"c:\\\\Users\\\\omar_\\\\valmak-app\" push origin main)"
+    ]
+  },
   "enabledPlugins": {
     "expo@claude-plugins-official": true
   }

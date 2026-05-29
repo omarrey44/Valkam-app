@@ -134,6 +134,15 @@ export default function Perfil() {
           <>
             <View style={[styles.divider, { backgroundColor: colors.border }]} />
             <MenuRow
+              icon="business-outline"
+              tint={colors.success}
+              title="Configuración de empresa"
+              subtitle="Nombre, logo, RFC, datos de contacto"
+              onPress={() => router.push('/empresa')}
+              colors={colors}
+            />
+            <View style={[styles.divider, { backgroundColor: colors.border }]} />
+            <MenuRow
               icon="people-outline"
               tint="#7C3AED"
               title="Usuarios y roles"

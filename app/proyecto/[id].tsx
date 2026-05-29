@@ -7,6 +7,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -31,6 +32,9 @@ export default function ProyectoDetalle() {
   const [busy, setBusy] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [tareaSel, setTareaSel] = useState<Tarea | null>(null);
+  const [notas, setNotas] = useState<{ id: string; contenido: string; creado_en: string; profiles: { nombre: string | null } | null }[]>([]);
+  const [nuevaNota, setNuevaNota] = useState('');
+  const [loadingNota, setLoadingNota] = useState(false);
 
   const puedeFacturar = profile?.rol === 'administrador' || profile?.rol === 'aprobador';
 
@@ -62,6 +66,12 @@ export default function ProyectoDetalle() {
       .eq('proyecto_id', id)
       .maybeSingle();
     setFactura((fac as Factura) ?? null);
+    const { data: nts } = await supabase
+      .from('proyecto_notas')
+      .select('id, contenido, creado_en, profiles(nombre)')
+      .eq('proyecto_id', id)
+      .order('creado_en', { ascending: true });
+    setNotas((nts as typeof notas) ?? []);
     setLoading(false);
   }, [id]);
 
@@ -147,6 +157,20 @@ export default function ProyectoDetalle() {
     setBusy(false);
     if (error) return Alert.alert('Error', error.message);
     router.push(`/factura/${(data as { id: string }).id}`);
+  }
+
+  async function agregarNota() {
+    if (!nuevaNota.trim()) return;
+    setLoadingNota(true);
+    const { data: u } = await supabase.auth.getUser();
+    await supabase.from('proyecto_notas').insert({
+      proyecto_id: id,
+      usuario_id: u.user?.id,
+      contenido: nuevaNota.trim(),
+    });
+    setNuevaNota('');
+    setLoadingNota(false);
+    load();
   }
 
   function openNueva() {
@@ -256,6 +280,27 @@ export default function ProyectoDetalle() {
             </Card>
           ))
         )}
+        {/* Notas internas */}
+        <Text style={styles.histTitle}>Notas del equipo</Text>
+        {notas.map((n) => (
+          <View key={n.id} style={styles.notaCard}>
+            <Text style={styles.notaAutor}>{n.profiles?.nombre ?? 'Usuario'} · {n.creado_en.slice(0, 10)}</Text>
+            <Text style={styles.notaTexto}>{n.contenido}</Text>
+          </View>
+        ))}
+        <View style={styles.notaInputRow}>
+          <TextInput
+            style={styles.notaInput}
+            value={nuevaNota}
+            onChangeText={setNuevaNota}
+            placeholder="Escribe una nota..."
+            placeholderTextColor={colors.textFaint}
+            multiline
+          />
+          <TouchableOpacity style={styles.notaBtn} onPress={agregarNota} disabled={loadingNota || !nuevaNota.trim()}>
+            {loadingNota ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="send" size={18} color="#fff" />}
+          </TouchableOpacity>
+        </View>
       </ScrollView>
 
       <TouchableOpacity style={styles.fab} onPress={openNueva}>
@@ -313,5 +358,18 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOpacity: 0.3,
     shadowRadius: 6,
+  },
+  notaCard: { backgroundColor: colors.card, borderRadius: radius.md, padding: 12, marginBottom: 8 },
+  notaAutor: { fontSize: 11, fontFamily: font.semibold, color: colors.textMuted, marginBottom: 4 },
+  notaTexto: { fontSize: 14, fontFamily: font.regular, color: colors.text },
+  notaInputRow: { flexDirection: 'row', gap: 8, alignItems: 'flex-end', marginBottom: 16 },
+  notaInput: {
+    flex: 1, backgroundColor: colors.card, borderRadius: radius.md,
+    paddingHorizontal: 14, paddingVertical: 10, fontFamily: font.regular,
+    color: colors.text, fontSize: 14, minHeight: 44, maxHeight: 100,
+  },
+  notaBtn: {
+    width: 44, height: 44, borderRadius: 22,
+    backgroundColor: colors.primaryBright, alignItems: 'center', justifyContent: 'center',
   },
 });

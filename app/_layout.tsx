@@ -77,6 +77,7 @@ function AppShell() {
         <Stack.Screen name="validacion/[id]" options={{ title: 'Validación' }} />
         <Stack.Screen name="entrega/[id]" options={{ title: 'Entrega' }} />
         <Stack.Screen name="actividad" options={{ title: 'Historial de actividad' }} />
+        <Stack.Screen name="empresa" options={{ title: 'Configuración de empresa' }} />
       </Stack>
     </>
   );

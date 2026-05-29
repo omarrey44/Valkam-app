@@ -38,7 +38,6 @@
           "cameraPermission": "Valmak necesita la cámara para tomar fotos de perfil."
         }
       ],
-      "expo-document-picker"
     ],
     "extra": {
       "router": {},

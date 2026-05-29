@@ -141,6 +141,13 @@ export default function Cotizaciones() {
                   {item.estado.toUpperCase()}
                 </Text>
               </View>
+              {(item.estado === 'pendiente' || item.estado === 'enviada') &&
+                Math.floor((Date.now() - new Date(item.fecha_cotizacion).getTime()) / 86400000) > 30 && (
+                <View style={styles.vencidaBadge}>
+                  <Ionicons name="time-outline" size={11} color="#fff" />
+                  <Text style={styles.vencidaText}>+30d</Text>
+                </View>
+              )}
             </View>
           </TouchableOpacity>
         )}
@@ -200,6 +207,8 @@ const styles = StyleSheet.create({
   pill: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: radius.pill },
   pillText: { fontSize: 10, fontFamily: font.bold, letterSpacing: 0.3 },
   empty: { textAlign: 'center', color: colors.textMuted, fontFamily: font.regular, marginTop: 40 },
+  vencidaBadge: { flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: colors.warning, borderRadius: radius.pill, paddingHorizontal: 7, paddingVertical: 3 },
+  vencidaText: { fontSize: 10, fontFamily: font.bold, color: '#fff' },
   topHeader: {
     flexDirection: 'row',
     alignItems: 'center',

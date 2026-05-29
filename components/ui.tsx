@@ -9,7 +9,8 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import { colors, font, radius, shadow } from '../lib/theme';
+import { font, radius, shadow } from '../lib/theme';
+import { useTheme } from '../lib/themeContext';
 
 export function Button({
   title,
@@ -24,12 +25,13 @@ export function Button({
   disabled?: boolean;
   variant?: 'primary' | 'secondary' | 'danger';
 }) {
+  const { colors } = useTheme();
   const bg =
     variant === 'primary'
       ? colors.primaryBright
       : variant === 'danger'
       ? colors.danger
-      : '#fff';
+      : colors.card;
   const fg = variant === 'secondary' ? colors.primaryBright : '#fff';
   const isDisabled = disabled || loading;
   return (
@@ -56,17 +58,22 @@ export function Field({
   label,
   ...props
 }: TextInputProps & { label: string }) {
+  const { colors } = useTheme();
   const req = label.endsWith(' *');
   const base = req ? label.slice(0, -2) : label;
   return (
     <View style={{ marginBottom: 16 }}>
-      <Text style={styles.label}>
+      <Text style={[styles.label, { color: colors.textMuted }]}>
         {base}
         {req && <Text style={{ color: colors.danger }}> *</Text>}
       </Text>
       <TextInput
         placeholderTextColor={colors.textFaint}
-        style={[styles.input, props.multiline && styles.inputMultiline]}
+        style={[
+          styles.input,
+          props.multiline && styles.inputMultiline,
+          { backgroundColor: colors.card, color: colors.text },
+        ]}
         {...props}
       />
     </View>
@@ -82,7 +89,12 @@ export function Card({
   style?: ViewStyle;
   onPress?: () => void;
 }) {
-  const content = <View style={[styles.card, style]}>{children}</View>;
+  const { colors } = useTheme();
+  const content = (
+    <View style={[styles.card, { backgroundColor: colors.card }, style]}>
+      {children}
+    </View>
+  );
   if (onPress)
     return (
       <TouchableOpacity onPress={onPress} activeOpacity={0.85}>
@@ -109,20 +121,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   btnText: { fontSize: 16, fontFamily: font.bold },
-  label: { fontSize: 13, fontFamily: font.semibold, color: colors.textMuted, marginBottom: 8 },
+  label: { fontSize: 13, fontFamily: font.semibold, marginBottom: 8 },
   input: {
-    backgroundColor: '#fff',
     borderRadius: radius.lg,
     paddingHorizontal: 16,
     paddingVertical: 15,
     fontSize: 16,
     fontFamily: font.regular,
-    color: colors.text,
     ...shadow.card,
   },
   inputMultiline: { minHeight: 90, paddingTop: 14, textAlignVertical: 'top' },
   card: {
-    backgroundColor: colors.card,
     borderRadius: radius.lg,
     padding: 16,
     marginBottom: 12,

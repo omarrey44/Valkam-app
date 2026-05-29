@@ -1,12 +1,10 @@
-import * as DocumentPicker from 'expo-document-picker';
-import * as FileSystem from 'expo-file-system';
-import * as ImagePicker from 'expo-image-picker';
-import * as Print from 'expo-print';
 import { decode } from 'base64-arraybuffer';
 import { supabase } from './supabase';
 import { SIG_WIDTH, SIG_HEIGHT } from '../components/SignaturePad';
 
 export async function pickAndUpload(bucket: string, path: string): Promise<string | null> {
+  const ImagePicker = await import('expo-image-picker');
+
   const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (!perm.granted) return null;
 
@@ -38,33 +36,40 @@ export async function uploadDocument(
   bucket: string,
   storagePath: string
 ): Promise<{ url: string; nombre: string } | null> {
-  const result = await DocumentPicker.getDocumentAsync({
-    type: '*/*',
-    copyToCacheDirectory: true,
+  const ImagePicker = await import('expo-image-picker');
+
+  const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  if (!perm.granted) return null;
+
+  const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    allowsEditing: false,
+    quality: 0.85,
+    base64: true,
   });
 
-  if (result.canceled || !result.assets[0]) return null;
+  if (result.canceled || !result.assets[0]?.base64) return null;
 
   const asset = result.assets[0];
-  const base64 = await FileSystem.readAsStringAsync(asset.uri, {
-    encoding: FileSystem.EncodingType.Base64,
-  });
-
-  const mime = asset.mimeType ?? 'application/octet-stream';
-  const ext = asset.name.split('.').pop() ?? 'bin';
+  const ext = asset.uri.split('.').pop()?.toLowerCase() ?? 'jpg';
+  const mime = ext === 'png' ? 'image/png' : 'image/jpeg';
   const fullPath = `${storagePath}.${ext}`;
+  const nombre = `adjunto.${ext}`;
 
   const { error } = await supabase.storage
     .from(bucket)
-    .upload(fullPath, decode(base64), { contentType: mime, upsert: true });
+    .upload(fullPath, decode(asset.base64), { contentType: mime, upsert: true });
 
   if (error) throw error;
 
   const url = supabase.storage.from(bucket).getPublicUrl(fullPath).data.publicUrl;
-  return { url, nombre: asset.name };
+  return { url, nombre };
 }
 
 export async function uploadSignature(paths: string[], storagePath: string): Promise<string> {
+  const Print = await import('expo-print');
+  const FileSystem = await import('expo-file-system');
+
   const pathsHtml = paths
     .map(
       (d) =>

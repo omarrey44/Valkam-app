@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Image,
   Linking,
   ScrollView,
   StyleSheet,
@@ -134,17 +135,21 @@ export default function PODetalle() {
       <View style={styles.adjuntoCard}>
         <Text style={styles.adjuntoTitle}>Archivo adjunto</Text>
         {po.archivo_adjunto ? (
-          <View style={styles.adjuntoRow}>
-            <Ionicons name="document-attach-outline" size={22} color={colors.primaryBright} />
-            <TouchableOpacity style={{ flex: 1 }} onPress={() => Linking.openURL(po.archivo_adjunto!)}>
-              <Text style={styles.adjuntoLink} numberOfLines={1}>
-                {po.archivo_adjunto.split('/').pop()}
-              </Text>
-              <Text style={styles.adjuntoSub}>Toca para abrir</Text>
+          <View>
+            <TouchableOpacity onPress={() => Linking.openURL(po.archivo_adjunto!)} activeOpacity={0.85}>
+              <Image
+                source={{ uri: po.archivo_adjunto }}
+                style={styles.adjuntoPreview}
+                resizeMode="cover"
+              />
             </TouchableOpacity>
-            <TouchableOpacity onPress={adjuntarArchivo} disabled={uploading} hitSlop={8}>
-              <Ionicons name="refresh-outline" size={20} color={colors.textMuted} />
-            </TouchableOpacity>
+            <View style={styles.adjuntoRow}>
+              <Ionicons name="document-attach-outline" size={18} color={colors.primaryBright} />
+              <Text style={[styles.adjuntoSub, { flex: 1 }]} numberOfLines={1}>Toca imagen para abrir</Text>
+              <TouchableOpacity onPress={adjuntarArchivo} disabled={uploading} hitSlop={8}>
+                <Ionicons name="refresh-outline" size={20} color={colors.textMuted} />
+              </TouchableOpacity>
+            </View>
           </View>
         ) : (
           <TouchableOpacity style={styles.adjuntoEmpty} onPress={adjuntarArchivo} disabled={uploading}>
@@ -208,4 +213,5 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
   },
   adjuntoEmptyText: { fontFamily: font.medium, color: colors.textMuted, fontSize: 14 },
+  adjuntoPreview: { width: '100%', height: 180, borderRadius: radius.md, marginBottom: 10, backgroundColor: colors.border },
 });

@@ -17,6 +17,9 @@ import { supabase } from '../../lib/supabase';
 import { colors, estadoProyectoColor, font, gradients, radius, shadow } from '../../lib/theme';
 import { Proyecto } from '../../lib/types';
 
+const FILTROS_PROY = ['todos', 'programado', 'en_proceso', 'validacion', 'completado'] as const;
+type FiltroProy = typeof FILTROS_PROY[number];
+
 export default function Proyectos() {
   const insets = useSafeAreaInsets();
   const { profile } = useAuth();
@@ -24,6 +27,7 @@ export default function Proyectos() {
   const [poCount, setPoCount] = useState(0);
   const [pendCount, setPendCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [filtro, setFiltro] = useState<typeof FILTROS_PROY[number]>('todos');
 
   const load = useCallback(async () => {
     const { data } = await supabase
@@ -111,15 +115,26 @@ export default function Proyectos() {
 
       {/* Proyectos */}
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Proyectos programados</Text>
+        <Text style={styles.sectionTitle}>Proyectos</Text>
       </View>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 20, marginBottom: 12 }}>
+        {FILTROS_PROY.map((f) => {
+          const on = filtro === f;
+          const label = f === 'todos' ? 'Todos' : f === 'en_proceso' ? 'En proceso' : f.charAt(0).toUpperCase() + f.slice(1);
+          return (
+            <TouchableOpacity key={f} onPress={() => setFiltro(f)} style={[styles.chip, on && styles.chipActive]}>
+              <Text style={[styles.chipText, on && { color: '#fff' }]}>{label}</Text>
+            </TouchableOpacity>
+          );
+        })}
+      </ScrollView>
       <View style={styles.section}>
         {loading ? (
           <ActivityIndicator color={colors.primary} style={{ marginTop: 12 }} />
-        ) : data.length === 0 ? (
-          <Text style={styles.empty}>Sin proyectos. Genera uno desde una orden de compra.</Text>
+        ) : data.filter((p) => filtro === 'todos' || p.estado === filtro).length === 0 ? (
+          <Text style={styles.empty}>Sin proyectos{filtro !== 'todos' ? ` con estado "${filtro}"` : ''}.</Text>
         ) : (
-          data.slice(0, 5).map((p) => (
+          data.filter((p) => filtro === 'todos' || p.estado === filtro).slice(0, 10).map((p) => (
             <TouchableOpacity
               key={p.id}
               activeOpacity={0.8}
@@ -294,4 +309,7 @@ const styles = StyleSheet.create({
   },
   quickTitle: { fontSize: 14, fontFamily: font.bold, color: colors.text },
   quickSub: { fontSize: 12, fontFamily: font.medium, color: colors.textMuted, marginTop: 2 },
+  chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: radius.pill, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border },
+  chipActive: { backgroundColor: colors.primaryBright, borderColor: colors.primaryBright },
+  chipText: { fontFamily: font.semibold, color: colors.textMuted, fontSize: 13 },
 });

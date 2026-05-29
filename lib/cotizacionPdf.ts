@@ -2,16 +2,28 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import { Platform } from 'react-native';
 import { valmakLogo } from './logo';
+import { getEmpresaConfig } from './empresaConfig';
 import { Cotizacion, CotizacionItem } from './types';
 
 function money(moneda: string, n: number) {
   return `${moneda} ${Number(n).toLocaleString('es-MX', { minimumFractionDigits: 2 })}`;
 }
 
-export function buildCotizacionHtml(
+export async function buildCotizacionHtmlAsync(
   c: Cotizacion,
   items: CotizacionItem[],
   empresa: string
+): Promise<string> {
+  const cfg = await getEmpresaConfig();
+  return buildCotizacionHtml(c, items, empresa, cfg.nombre, cfg.slogan ?? '');
+}
+
+export function buildCotizacionHtml(
+  c: Cotizacion,
+  items: CotizacionItem[],
+  empresa: string,
+  empNombre = 'VALMAK',
+  empSlogan = 'Ingeniería en Diseño y Automatización'
 ): string {
   const total = items.length
     ? items.reduce((s, i) => s + Number(i.cantidad) * Number(i.precio_unitario), 0)
@@ -74,7 +86,7 @@ export function buildCotizacionHtml(
       ${c.detalles_tecnicos ? `<h3 style="margin-top:18px">Detalles técnicos</h3><p style="white-space:pre-wrap;line-height:1.5">${c.detalles_tecnicos}</p>` : ''}
 
       <p style="margin-top:40px;color:#94A3B8;font-size:12px;border-top:1px solid #EAEEF3;padding-top:12px">
-        VALMAK · Ingeniería en Diseño y Automatización
+        ${empNombre}${empSlogan ? ` · ${empSlogan}` : ''}
       </p>
     </div>
   </body></html>`;
