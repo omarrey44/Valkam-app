@@ -6,6 +6,7 @@ import { logActividad } from '../lib/actividad';
 import { formatMoney, parseMoney } from '../lib/money';
 import { supabase } from '../lib/supabase';
 import { colors } from '../lib/theme';
+import { useTheme } from '../lib/themeContext';
 import { InventarioItem } from '../lib/types';
 
 const CATEGORIAS = ['Materia prima', 'Herramienta', 'Consumible', 'Refacción', 'Equipo', 'Electrónico', 'Estructura'];
@@ -20,6 +21,7 @@ export default function InventarioForm({
   itemId?: string;
   onSaved: (id: string) => void;
 }) {
+  const { colors } = useTheme();
   const [loading, setLoading] = useState(false);
   const [f, setF] = useState({
     nombre: initial?.nombre ?? '',
@@ -73,7 +75,7 @@ export default function InventarioForm({
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ padding: 16, paddingBottom: 48 }}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.bg }]} contentContainerStyle={{ padding: 16, paddingBottom: 48 }}>
       <Field label="Nombre *" value={f.nombre} onChangeText={(v) => set('nombre', v)} />
       <Field label="SKU / Código" value={f.sku} onChangeText={(v) => set('sku', v)} autoCapitalize="characters" />
       <SelectOrText label="Categoría" value={f.categoria} onChange={(v) => set('categoria', v)} options={CATEGORIAS} placeholder="Escribe una categoría..." />

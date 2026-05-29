@@ -8,6 +8,7 @@ import { logActividad } from '../lib/actividad';
 import { formatMoney, parseMoney } from '../lib/money';
 import { supabase } from '../lib/supabase';
 import { colors, estadoFacturaColor } from '../lib/theme';
+import { useTheme } from '../lib/themeContext';
 import { Factura, Moneda } from '../lib/types';
 
 const TERMINOS = ['100% anticipo', '50% anticipo / 50% entrega', '30% anticipo / 70% entrega', 'Neto 30', 'Neto 60', 'Contra entrega'];
@@ -30,6 +31,7 @@ export default function FacturaForm({
   facturaId: string;
   onSaved: () => void;
 }) {
+  const { colors } = useTheme();
   const [loading, setLoading] = useState(false);
   const [f, setF] = useState({
     monto: String(initial.monto ?? ''),
@@ -66,7 +68,7 @@ export default function FacturaForm({
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ padding: 16, paddingBottom: 48 }}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.bg }]} contentContainerStyle={{ padding: 16, paddingBottom: 48 }}>
       <Field label="Monto" value={formatMoney(f.monto)} onChangeText={(v) => set('monto', parseMoney(v))} keyboardType="decimal-pad" />
       <SegmentSelect
         label="Moneda"

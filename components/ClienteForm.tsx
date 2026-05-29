@@ -9,6 +9,7 @@ import { pickAndUpload } from '../lib/upload';
 import { logActividad } from '../lib/actividad';
 import { Cliente } from '../lib/types';
 import { colors, estadoClienteColor, font, gradients, radius, shadow } from '../lib/theme';
+import { useTheme } from '../lib/themeContext';
 
 export type ClienteInput = Omit<Cliente, 'id' | 'creado_por' | 'creado_en' | 'actualizado_en'>;
 
@@ -35,6 +36,7 @@ export default function ClienteForm({
   clienteId?: string;
   onSaved: (id: string) => void;
 }) {
+  const { colors } = useTheme();
   const [f, setF] = useState<ClienteInput>({ ...empty, ...initial });
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -86,20 +88,20 @@ export default function ClienteForm({
   const inicial = f.empresa.trim().charAt(0).toUpperCase() || '?';
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.bg }]} contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
       {/* Logo picker */}
       <TouchableOpacity style={styles.logoWrap} onPress={pickLogo} disabled={uploading} activeOpacity={0.8}>
         {f.logo_url ? (
           <Image source={{ uri: f.logo_url }} style={styles.logoImg} />
         ) : (
-          <View style={styles.logoPlaceholder}>
+          <View style={[styles.logoPlaceholder, { backgroundColor: colors.card }]}>
             <Text style={styles.logoInitial}>{inicial}</Text>
           </View>
         )}
-        <View style={styles.cameraBtn}>
+        <View style={[styles.cameraBtn, { backgroundColor: colors.card }]}>
           <Ionicons name={uploading ? 'hourglass-outline' : 'camera'} size={16} color={colors.primaryBright} />
         </View>
-        <Text style={styles.logoHint}>{uploading ? 'Subiendo…' : 'Toca para subir logo'}</Text>
+        <Text style={[styles.logoHint, { color: colors.textMuted }]}>{uploading ? 'Subiendo…' : 'Toca para subir logo'}</Text>
       </TouchableOpacity>
 
       <FieldIcon label="Empresa *" icon="business-outline" iconTint={colors.primaryBright} iconBg="#EAF1FE" value={f.empresa} onChangeText={(v) => set('empresa', v)} placeholder="Nombre de la empresa" />

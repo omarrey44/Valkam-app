@@ -19,6 +19,7 @@ import { logActividad } from '../lib/actividad';
 import { supabase } from '../lib/supabase';
 import { formatMoney, parseMoney } from '../lib/money';
 import { colors, font, gradients, radius, shadow } from '../lib/theme';
+import { useTheme } from '../lib/themeContext';
 import { Cliente, Cotizacion, CotizacionItem, Moneda } from '../lib/types';
 
 const TERMINOS = ['100% anticipo', '50% anticipo / 50% entrega', '30% anticipo / 70% entrega', 'Neto 30', 'Neto 60', 'Contra entrega'];
@@ -61,6 +62,7 @@ export default function CotizacionForm({
   cotizacionId?: string;
   onSaved: (id: string) => void;
 }) {
+  const { colors } = useTheme();
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -184,7 +186,7 @@ export default function CotizacionForm({
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.bg }]} contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
       <SelectIcon
         label="Cliente *"
         icon="person-outline"

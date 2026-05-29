@@ -17,6 +17,7 @@ import { logActividad } from '../lib/actividad';
 import { formatMoney, parseMoney } from '../lib/money';
 import { supabase } from '../lib/supabase';
 import { colors, estadoPOColor } from '../lib/theme';
+import { useTheme } from '../lib/themeContext';
 import { Cotizacion, Moneda, OrdenCompra } from '../lib/types';
 
 const TERMINOS = ['100% anticipo', '50% anticipo / 50% entrega', '30% anticipo / 70% entrega', 'Neto 30', 'Neto 60', 'Contra entrega'];
@@ -48,6 +49,7 @@ export default function POForm({
   poId?: string;
   onSaved: (id: string) => void;
 }) {
+  const { colors } = useTheme();
   const [cotizaciones, setCotizaciones] = useState<Cotizacion[]>([]);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -129,7 +131,7 @@ export default function POForm({
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ padding: 16, paddingBottom: 48 }}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.bg }]} contentContainerStyle={{ padding: 16, paddingBottom: 48 }}>
       <Text style={styles.label}>Cotización origen *</Text>
       <TouchableOpacity
         style={[styles.picker, !!poId && { opacity: 0.5 }]}

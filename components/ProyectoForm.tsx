@@ -6,6 +6,7 @@ import SegmentSelect from './SegmentSelect';
 import UserPicker from './UserPicker';
 import { supabase } from '../lib/supabase';
 import { colors, estadoProyectoColor } from '../lib/theme';
+import { useTheme } from '../lib/themeContext';
 import { Proyecto } from '../lib/types';
 
 const ESTADOS = [
@@ -25,6 +26,7 @@ export default function ProyectoForm({
   proyectoId: string;
   onSaved: () => void;
 }) {
+  const { colors } = useTheme();
   const [loading, setLoading] = useState(false);
   const [f, setF] = useState({
     nombre_proyecto: initial.nombre_proyecto ?? '',
@@ -60,7 +62,7 @@ export default function ProyectoForm({
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ padding: 16, paddingBottom: 48 }}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.bg }]} contentContainerStyle={{ padding: 16, paddingBottom: 48 }}>
       <Field label="Nombre del proyecto" value={f.nombre_proyecto} onChangeText={(v) => set('nombre_proyecto', v)} />
       <Field label="Descripción" value={f.descripcion} onChangeText={(v) => set('descripcion', v)} multiline />
       <DateField label="Fecha inicio" value={f.fecha_inicio} onChange={(v) => set('fecha_inicio', v)} clearable />
