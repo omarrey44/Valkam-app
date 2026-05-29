@@ -16,8 +16,10 @@ import { useAuth } from '../lib/auth';
 import { supabase } from '../lib/supabase';
 import { pickAndUpload } from '../lib/upload';
 import { colors, font, radius, shadow } from '../lib/theme';
+import { useTheme } from '../lib/themeContext';
 
 export default function PerfilEditar() {
+  const { colors } = useTheme();
   const { profile, session, refreshProfile } = useAuth();
   const [nombre, setNombre] = useState(profile?.nombre ?? '');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(profile?.avatar_url ?? null);
@@ -78,7 +80,7 @@ export default function PerfilEditar() {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.bg }]} contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
       {/* Avatar picker */}
       <TouchableOpacity style={styles.avatarWrap} onPress={pickAvatar} disabled={uploading} activeOpacity={0.8}>
         {avatarUrl ? (
@@ -102,7 +104,7 @@ export default function PerfilEditar() {
       <Text style={styles.sectionTitle}>Cambiar contraseña</Text>
       <Text style={styles.sectionSub}>Deja vacío si no quieres cambiarla</Text>
 
-      <View style={styles.passField}>
+      <View style={[styles.passField, { backgroundColor: colors.card }]}>
         <Text style={styles.passLabel}>Nueva contraseña</Text>
         <View style={styles.passRow}>
           <TextInput
@@ -120,7 +122,7 @@ export default function PerfilEditar() {
         </View>
       </View>
 
-      <View style={styles.passField}>
+      <View style={[styles.passField, { backgroundColor: colors.card }]}>
         <Text style={styles.passLabel}>Confirmar contraseña</Text>
         <View style={styles.passRow}>
           <TextInput

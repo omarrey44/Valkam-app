@@ -23,9 +23,11 @@ import {
   shadow,
   whatsappUrl,
 } from '../../lib/theme';
+import { useTheme } from '../../lib/themeContext';
 import { Cliente, Cotizacion } from '../../lib/types';
 
 export default function ClienteDetalle() {
+  const { colors } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [cliente, setCliente] = useState<Cliente | null>(null);
   const [cotizaciones, setCotizaciones] = useState<Cotizacion[]>([]);
@@ -108,7 +110,7 @@ export default function ClienteDetalle() {
   const totalCotizado = cotizaciones.reduce((s, c) => s + Number(c.monto), 0);
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.bg }]} contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
       <Stack.Screen
         options={{
           title: cliente.empresa,
@@ -126,7 +128,7 @@ export default function ClienteDetalle() {
       />
 
       {/* Cabecera */}
-      <View style={styles.headCard}>
+      <View style={[styles.headCard, { backgroundColor: colors.card }]}>
         <View style={styles.headTop}>
           {cliente.logo_url ? (
             <Image source={{ uri: cliente.logo_url }} style={styles.avatar} />
@@ -136,7 +138,7 @@ export default function ClienteDetalle() {
             </View>
           )}
           <View style={{ flex: 1, marginLeft: 14 }}>
-            <Text style={styles.empresa}>{cliente.empresa}</Text>
+            <Text style={[styles.empresa, { color: colors.text }]}>{cliente.empresa}</Text>
             {!!cliente.ingeniero && <Text style={styles.sub}>Ing. {cliente.ingeniero}</Text>}
             <View style={[styles.estadoPill, { backgroundColor: estadoClienteColor[cliente.estado] + '1A' }]}>
               <Text style={[styles.estadoText, { color: estadoClienteColor[cliente.estado] }]}>
@@ -184,9 +186,9 @@ export default function ClienteDetalle() {
         <Text style={styles.empty}>Sin cotizaciones para este cliente.</Text>
       ) : (
         cotizaciones.slice(0, 8).map((c) => (
-          <TouchableOpacity key={c.id} style={styles.cotCard} onPress={() => router.push(`/cotizacion/${c.id}`)}>
+          <TouchableOpacity key={c.id} style={[styles.cotCard, { backgroundColor: colors.card }]} onPress={() => router.push(`/cotizacion/${c.id}`)}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.cotTitulo} numberOfLines={1}>{c.titulo}</Text>
+              <Text style={[styles.cotTitulo, { color: colors.text }]} numberOfLines={1}>{c.titulo}</Text>
               <Text style={styles.cotMonto}>
                 {c.moneda} {c.monto.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
               </Text>
@@ -225,8 +227,9 @@ function Contacto({
 }
 
 function Stat({ value, label, tint }: { value: string; label: string; tint?: string }) {
+  const { colors } = useTheme();
   return (
-    <View style={styles.stat}>
+    <View style={[styles.stat, { backgroundColor: colors.card }]}>
       <Text style={[styles.statValue, tint && { color: tint }]}>{value}</Text>
       <Text style={styles.statLabel}>{label}</Text>
     </View>

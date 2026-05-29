@@ -13,9 +13,11 @@ import {
 import IconField from '../../components/IconField';
 import { supabase } from '../../lib/supabase';
 import { colors, font, radius, shadow } from '../../lib/theme';
+import { useTheme } from '../../lib/themeContext';
 import { InventarioItem } from '../../lib/types';
 
 export default function Inventario() {
+  const { colors } = useTheme();
   const [data, setData] = useState<InventarioItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState('');
@@ -48,7 +50,7 @@ export default function Inventario() {
     );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.bg }]}>
       <FlatList
         data={filtered}
         keyExtractor={(i) => i.id}
@@ -69,12 +71,12 @@ export default function Inventario() {
         renderItem={({ item }) => {
           const bajo = item.cantidad <= item.stock_minimo;
           return (
-            <TouchableOpacity activeOpacity={0.85} style={styles.card} onPress={() => router.push(`/inventario/${item.id}`)}>
+            <TouchableOpacity activeOpacity={0.85} style={[styles.card, { backgroundColor: colors.card }]} onPress={() => router.push(`/inventario/${item.id}`)}>
               <View style={[styles.tile, bajo && { backgroundColor: '#FEE2E2' }]}>
                 <Ionicons name="cube-outline" size={24} color={bajo ? colors.danger : colors.success} />
               </View>
               <View style={{ flex: 1, marginLeft: 14 }}>
-                <Text style={styles.nombre} numberOfLines={1}>{item.nombre}</Text>
+                <Text style={[styles.nombre, { color: colors.text }]} numberOfLines={1}>{item.nombre}</Text>
                 <Text style={styles.sub} numberOfLines={1}>
                   {item.categoria ?? 'Sin categoría'}{item.sku ? ` · ${item.sku}` : ''}
                 </Text>
@@ -97,8 +99,9 @@ export default function Inventario() {
 }
 
 function Kpi({ value, label, tint }: { value: string; label: string; tint?: string }) {
+  const { colors } = useTheme();
   return (
-    <View style={styles.kpi}>
+    <View style={[styles.kpi, { backgroundColor: colors.card }]}>
       <Text style={[styles.kpiValue, tint && { color: tint }]}>{value}</Text>
       <Text style={styles.kpiLabel}>{label}</Text>
     </View>

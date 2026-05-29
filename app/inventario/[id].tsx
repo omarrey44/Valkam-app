@@ -5,9 +5,11 @@ import { ActivityIndicator, Alert, TouchableOpacity, View } from 'react-native';
 import InventarioForm from '../../components/InventarioForm';
 import { supabase } from '../../lib/supabase';
 import { colors } from '../../lib/theme';
+import { useTheme } from '../../lib/themeContext';
 import { InventarioItem } from '../../lib/types';
 
 export default function InventarioDetalle() {
+  const { colors } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [item, setItem] = useState<InventarioItem | null>(null);
   const [loading, setLoading] = useState(true);

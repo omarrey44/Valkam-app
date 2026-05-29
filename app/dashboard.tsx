@@ -13,6 +13,7 @@ import { BarChart, Donut } from '../components/Charts';
 import { Card } from '../components/ui';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, shadow } from '../lib/theme';
+import { useTheme } from '../lib/themeContext';
 import { MetricaVendedor } from '../lib/types';
 
 const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
@@ -34,6 +35,7 @@ function rangoFechas(r: Rango): { desde: string | null; hasta: string | null } {
 }
 
 export default function Dashboard() {
+  const { colors } = useTheme();
   const [rango, setRango] = useState<Rango>('mes');
   const [data, setData] = useState<MetricaVendedor[]>([]);
   const [porMes, setPorMes] = useState<{ label: string; value: number }[]>([]);
@@ -86,13 +88,13 @@ export default function Dashboard() {
   ];
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ padding: 16, paddingBottom: 32 }}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.bg }]} contentContainerStyle={{ padding: 16, paddingBottom: 32 }}>
       <View style={styles.tabs}>
         {RANGOS.map((r) => (
           <TouchableOpacity
             key={r.v}
             onPress={() => setRango(r.v)}
-            style={[styles.tab, rango === r.v && styles.tabActive]}
+            style={[styles.tab, { backgroundColor: colors.card }, rango === r.v && styles.tabActive]}
           >
             <Text style={[styles.tabText, rango === r.v && { color: '#fff' }]}>{r.label}</Text>
           </TouchableOpacity>
@@ -121,7 +123,7 @@ export default function Dashboard() {
         </View>
       </Card>
 
-      <Text style={styles.sectionTitle}>Por vendedor</Text>
+      <Text style={[styles.sectionTitle, { color: colors.text }]}>Por vendedor</Text>
 
       {loading ? (
         <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: 40 }} />

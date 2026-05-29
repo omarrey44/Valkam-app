@@ -15,6 +15,7 @@ import GradientHeader from '../../components/GradientHeader';
 import { Button } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
 import { colors, font, radius, shadow } from '../../lib/theme';
+import { useTheme } from '../../lib/themeContext';
 import { Proyecto, ValidacionItem } from '../../lib/types';
 
 const SUGERIDOS = [
@@ -26,6 +27,7 @@ const SUGERIDOS = [
 ];
 
 export default function Validacion() {
+  const { colors } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [proyecto, setProyecto] = useState<Proyecto | null>(null);
   const [items, setItems] = useState<ValidacionItem[]>([]);
@@ -95,7 +97,7 @@ export default function Validacion() {
   const hechos = items.filter((i) => i.completado).length;
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ padding: 16, paddingBottom: 48 }}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.bg }]} contentContainerStyle={{ padding: 16, paddingBottom: 48 }}>
       <GradientHeader
         colors={['#6D28D9', '#8B5CF6']}
         icon="shield-checkmark-outline"
@@ -132,7 +134,7 @@ export default function Validacion() {
       )}
 
       {items.map((it) => (
-        <View key={it.id} style={styles.itemCard}>
+        <View key={it.id} style={[styles.itemCard, { backgroundColor: colors.card }]}>
           <TouchableOpacity onPress={() => toggle(it)} hitSlop={8}>
             <Ionicons
               name={it.completado ? 'checkbox' : 'square-outline'}
@@ -140,7 +142,7 @@ export default function Validacion() {
               color={it.completado ? colors.success : colors.textMuted}
             />
           </TouchableOpacity>
-          <Text style={[styles.itemText, it.completado && { color: colors.textMuted, textDecorationLine: 'line-through' }]}>
+          <Text style={[styles.itemText, { color: colors.text }, it.completado && { color: colors.textMuted, textDecorationLine: 'line-through' }]}>
             {it.item}
           </Text>
           <TouchableOpacity onPress={() => eliminar(it)} hitSlop={8}>

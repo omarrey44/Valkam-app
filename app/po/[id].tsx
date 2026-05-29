@@ -18,9 +18,11 @@ import POForm from '../../components/POForm';
 import { supabase } from '../../lib/supabase';
 import { uploadDocument } from '../../lib/upload';
 import { colors, font, gradients, radius, shadow } from '../../lib/theme';
+import { useTheme } from '../../lib/themeContext';
 import { OrdenCompra, Proyecto } from '../../lib/types';
 
 export default function PODetalle() {
+  const { colors } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [po, setPO] = useState<OrdenCompra | null>(null);
   const [proyecto, setProyecto] = useState<Proyecto | null>(null);
@@ -132,7 +134,7 @@ export default function PODetalle() {
       </Card>
 
       {/* Archivo adjunto */}
-      <View style={styles.adjuntoCard}>
+      <View style={[styles.adjuntoCard, { backgroundColor: colors.card }]}>
         <Text style={styles.adjuntoTitle}>Archivo adjunto</Text>
         {po.archivo_adjunto ? (
           <View>
@@ -174,10 +176,11 @@ export default function PODetalle() {
 }
 
 function Campo({ label, value }: { label: string; value: string }) {
+  const { colors } = useTheme();
   return (
     <View style={{ marginBottom: 10 }}>
       <Text style={styles.campoLabel}>{label}</Text>
-      <Text style={styles.campoValue}>{value}</Text>
+      <Text style={[styles.campoValue, { color: colors.text }]}>{value}</Text>
     </View>
   );
 }

@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import { Stack, router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {
@@ -15,6 +14,7 @@ import GradientHeader from '../../components/GradientHeader';
 import { useAuth } from '../../lib/auth';
 import { supabase } from '../../lib/supabase';
 import { colors, font, gradients } from '../../lib/theme';
+import { useTheme } from '../../lib/themeContext';
 import { buildCotizacionHtml, compartirCotizacionPdf } from '../../lib/cotizacionPdf';
 import { Cotizacion, CotizacionItem, CotizacionRevision } from '../../lib/types';
 
@@ -23,6 +23,7 @@ function nextRev(r: string) {
 }
 
 export default function CotizacionDetalle() {
+  const { colors } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { profile } = useAuth();
   const [c, setC] = useState<Cotizacion | null>(null);
@@ -190,7 +191,7 @@ export default function CotizacionDetalle() {
   const monto = `${c.moneda} ${c.monto.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`;
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ padding: 16, paddingBottom: 48 }}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.bg }]} contentContainerStyle={{ padding: 16, paddingBottom: 48 }}>
       <Stack.Screen options={{ title: `Rev. ${c.revision_current}` }} />
 
       <GradientHeader
@@ -207,7 +208,7 @@ export default function CotizacionDetalle() {
           <Text style={styles.partidasTitle}>Partidas</Text>
           {items.map((it) => (
             <View key={it.id} style={styles.itemRow}>
-              <Text style={styles.itemDesc} numberOfLines={2}>
+              <Text style={[styles.itemDesc, { color: colors.text }]} numberOfLines={2}>
                 {it.descripcion}
               </Text>
               <Text style={styles.itemQty}>
@@ -268,10 +269,11 @@ export default function CotizacionDetalle() {
 }
 
 function Campo({ label, value }: { label: string; value: string }) {
+  const { colors } = useTheme();
   return (
     <View style={{ marginBottom: 10 }}>
       <Text style={styles.campoLabel}>{label}</Text>
-      <Text style={styles.campoValue}>{value}</Text>
+      <Text style={[styles.campoValue, { color: colors.text }]}>{value}</Text>
     </View>
   );
 }

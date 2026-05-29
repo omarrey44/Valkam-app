@@ -15,9 +15,11 @@ import {
 import IconField from '../../components/IconField';
 import { supabase } from '../../lib/supabase';
 import { colors, estadoClienteColor, font, radius, shadow, whatsappUrl } from '../../lib/theme';
+import { useTheme } from '../../lib/themeContext';
 import { Cliente } from '../../lib/types';
 
 export default function Clientes() {
+  const { colors } = useTheme();
   const [data, setData] = useState<Cliente[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState('');
@@ -51,9 +53,9 @@ export default function Clientes() {
     );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.topHeader}>
-        <Text style={styles.topTitle}>Clientes</Text>
+    <View style={[styles.container, { backgroundColor: colors.bg }]}>
+      <View style={[styles.topHeader, { backgroundColor: colors.bg }]}>
+        <Text style={[styles.topTitle, { color: colors.text }]}>Clientes</Text>
         <TouchableOpacity style={styles.addBtn} onPress={() => router.push('/cliente/nuevo')}>
           <Ionicons name="add" size={28} color="#fff" />
         </TouchableOpacity>
@@ -82,7 +84,7 @@ export default function Clientes() {
         renderItem={({ item }) => (
           <TouchableOpacity
             activeOpacity={0.85}
-            style={styles.card}
+            style={[styles.card, { backgroundColor: colors.card }]}
             onPress={() => router.push(`/cliente/${item.id}`)}
           >
             {item.logo_url ? (
@@ -94,7 +96,7 @@ export default function Clientes() {
             )}
             <View style={{ flex: 1, marginLeft: 14 }}>
               <View style={styles.empresaRow}>
-                <Text style={styles.empresa} numberOfLines={1}>
+                <Text style={[styles.empresa, { color: colors.text }]} numberOfLines={1}>
                   {item.empresa}
                 </Text>
                 <View style={[styles.dot, { backgroundColor: estadoClienteColor[item.estado] }]} />

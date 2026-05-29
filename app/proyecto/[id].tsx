@@ -17,7 +17,7 @@ import ProyectoForm from '../../components/ProyectoForm';
 import TareaModal from '../../components/TareaModal';
 import { useAuth } from '../../lib/auth';
 import { supabase } from '../../lib/supabase';
-import { colors, estadoTareaColor, gradients, prioridadColor } from '../../lib/theme';
+import { colors, estadoTareaColor, font, gradients, prioridadColor, radius } from '../../lib/theme';
 import { Factura, Proyecto, Tarea } from '../../lib/types';
 
 export default function ProyectoDetalle() {

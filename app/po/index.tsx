@@ -12,9 +12,11 @@ import {
 } from 'react-native';
 import { supabase } from '../../lib/supabase';
 import { colors, estadoPOColor, font, radius, shadow } from '../../lib/theme';
+import { useTheme } from '../../lib/themeContext';
 import { OrdenCompra } from '../../lib/types';
 
 export default function POList() {
+  const { colors } = useTheme();
   const [data, setData] = useState<OrdenCompra[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -41,7 +43,7 @@ export default function POList() {
     );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.bg }]}>
       <FlatList
         data={data}
         keyExtractor={(p) => p.id}
@@ -53,12 +55,12 @@ export default function POList() {
           </Text>
         }
         renderItem={({ item }) => (
-          <TouchableOpacity activeOpacity={0.85} style={styles.card} onPress={() => router.push(`/po/${item.id}`)}>
+          <TouchableOpacity activeOpacity={0.85} style={[styles.card, { backgroundColor: colors.card }]} onPress={() => router.push(`/po/${item.id}`)}>
             <View style={styles.tile}>
               <Ionicons name="receipt-outline" size={24} color={colors.primaryBright} />
             </View>
             <View style={{ flex: 1, marginLeft: 14 }}>
-              <Text style={styles.numero}>{item.numero_po ?? 'PO'}</Text>
+              <Text style={[styles.numero, { color: colors.text }]}>{item.numero_po ?? 'PO'}</Text>
               <Text style={styles.sub} numberOfLines={1}>{item.cotizaciones?.titulo ?? '—'}</Text>
               <Text style={styles.sub} numberOfLines={1}>{item.clientes?.empresa ?? '—'}</Text>
               <Text style={styles.monto}>

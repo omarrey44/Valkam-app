@@ -13,6 +13,7 @@ import SegmentSelect from '../components/SegmentSelect';
 import { useAuth } from '../lib/auth';
 import { supabase } from '../lib/supabase';
 import { colors } from '../lib/theme';
+import { useTheme } from '../lib/themeContext';
 import { Profile, Rol } from '../lib/types';
 
 const ROLES = [
@@ -22,6 +23,7 @@ const ROLES = [
 ];
 
 export default function Usuarios() {
+  const { colors } = useTheme();
   const { profile, session } = useAuth();
   const [users, setUsers] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -69,7 +71,7 @@ export default function Usuarios() {
       }
       renderItem={({ item }) => (
         <Card>
-          <Text style={styles.nombre}>
+          <Text style={[styles.nombre, { color: colors.text }]}>
             {item.nombre ?? item.email}
             {item.id === session?.user?.id ? '  (tú)' : ''}
           </Text>

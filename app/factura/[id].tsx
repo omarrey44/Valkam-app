@@ -17,9 +17,11 @@ import { useAuth } from '../../lib/auth';
 import { buildFacturaHtml, compartirFacturaPdf } from '../../lib/facturaPdf';
 import { supabase } from '../../lib/supabase';
 import { colors, gradients } from '../../lib/theme';
+import { useTheme } from '../../lib/themeContext';
 import { Factura } from '../../lib/types';
 
 export default function FacturaDetalle() {
+  const { colors } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { profile } = useAuth();
   const [f, setF] = useState<Factura | null>(null);
@@ -111,7 +113,7 @@ export default function FacturaDetalle() {
     );
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ padding: 16, paddingBottom: 48 }}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.bg }]} contentContainerStyle={{ padding: 16, paddingBottom: 48 }}>
       <Stack.Screen
         options={{
           title: f.numero_factura ?? 'Factura',
@@ -159,10 +161,11 @@ export default function FacturaDetalle() {
 }
 
 function Campo({ label, value }: { label: string; value: string }) {
+  const { colors } = useTheme();
   return (
     <View style={{ marginBottom: 10 }}>
       <Text style={styles.campoLabel}>{label}</Text>
-      <Text style={styles.campoValue}>{value}</Text>
+      <Text style={[styles.campoValue, { color: colors.text }]}>{value}</Text>
     </View>
   );
 }

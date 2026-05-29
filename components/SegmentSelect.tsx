@@ -1,17 +1,11 @@
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { colors } from '../lib/theme';
+import { font, radius } from '../lib/theme';
+import { useTheme } from '../lib/themeContext';
 
-export interface Opt {
-  value: string;
-  label: string;
-}
+export interface Opt { value: string; label: string; }
 
 export default function SegmentSelect({
-  label,
-  options,
-  value,
-  onChange,
-  colorMap,
+  label, options, value, onChange, colorMap,
 }: {
   label?: string;
   options: Opt[];
@@ -19,23 +13,21 @@ export default function SegmentSelect({
   onChange: (v: string) => void;
   colorMap?: Record<string, string>;
 }) {
+  const { colors } = useTheme();
   return (
     <View style={{ marginBottom: 14 }}>
-      {!!label && <Text style={styles.label}>{label}</Text>}
+      {!!label && <Text style={[styles.label, { color: colors.textMuted }]}>{label}</Text>}
       <View style={styles.row}>
         {options.map((o) => {
           const active = value === o.value;
-          const activeBg = colorMap?.[o.value] ?? colors.primary;
+          const activeBg = colorMap?.[o.value] ?? colors.primaryBright;
           return (
             <TouchableOpacity
               key={o.value}
               onPress={() => onChange(o.value)}
-              style={[
-                styles.btn,
-                active && { backgroundColor: activeBg, borderColor: activeBg },
-              ]}
+              style={[styles.btn, { backgroundColor: colors.card, borderColor: colors.border }, active && { backgroundColor: activeBg, borderColor: activeBg }]}
             >
-              <Text style={[styles.text, active && { color: '#fff' }]}>{o.label}</Text>
+              <Text style={[styles.text, { color: colors.text }, active && { color: '#fff' }]}>{o.label}</Text>
             </TouchableOpacity>
           );
         })}
@@ -45,15 +37,8 @@ export default function SegmentSelect({
 }
 
 const styles = StyleSheet.create({
-  label: { fontSize: 13, fontWeight: '600', color: colors.textMuted, marginBottom: 6 },
+  label: { fontSize: 13, fontFamily: font.semibold, marginBottom: 6 },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  btn: {
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: '#fff',
-  },
-  text: { fontWeight: '700', color: colors.text, fontSize: 13 },
+  btn: { paddingVertical: 10, paddingHorizontal: 14, borderRadius: radius.md, borderWidth: 1 },
+  text: { fontFamily: font.bold, fontSize: 13 },
 });

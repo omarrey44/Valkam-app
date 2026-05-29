@@ -13,9 +13,11 @@ import {
 } from 'react-native';
 import { supabase } from '../../lib/supabase';
 import { colors, estadoColor, font, gradients, radius, shadow } from '../../lib/theme';
+import { useTheme } from '../../lib/themeContext';
 import { Cotizacion } from '../../lib/types';
 
 export default function Pendientes() {
+  const { colors } = useTheme();
   const [data, setData] = useState<Cotizacion[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -43,7 +45,7 @@ export default function Pendientes() {
     );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.bg }]}>
       <FlatList
         data={data}
         keyExtractor={(c) => c.id}
@@ -61,12 +63,12 @@ export default function Pendientes() {
         }
         ListEmptyComponent={<Text style={styles.empty}>Nada pendiente 🎉</Text>}
         renderItem={({ item }) => (
-          <TouchableOpacity activeOpacity={0.85} style={styles.card} onPress={() => router.push(`/cotizacion/${item.id}`)}>
+          <TouchableOpacity activeOpacity={0.85} style={[styles.card, { backgroundColor: colors.card }]} onPress={() => router.push(`/cotizacion/${item.id}`)}>
             <View style={styles.tile}>
               <Ionicons name="document-text-outline" size={24} color={colors.warning} />
             </View>
             <View style={{ flex: 1, marginLeft: 14 }}>
-              <Text style={styles.titulo} numberOfLines={1}>{item.titulo}</Text>
+              <Text style={[styles.titulo, { color: colors.text }]} numberOfLines={1}>{item.titulo}</Text>
               <Text style={styles.sub} numberOfLines={1}>{item.clientes?.empresa ?? '—'}</Text>
               <Text style={styles.fecha}>{item.fecha_cotizacion}</Text>
             </View>

@@ -5,6 +5,7 @@ import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, Text, Touchabl
 import { useAuth } from '../lib/auth';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, shadow } from '../lib/theme';
+import { useTheme } from '../lib/themeContext';
 
 interface LogRow {
   id: string;
@@ -37,6 +38,7 @@ function fmtFecha(iso: string) {
 }
 
 export default function ActividadScreen() {
+  const { colors } = useTheme();
   const { profile } = useAuth();
   const esAdmin = profile?.rol === 'administrador';
   const [data, setData] = useState<LogRow[]>([]);
@@ -70,17 +72,17 @@ export default function ActividadScreen() {
   return (
     <>
       <Stack.Screen options={{ title: 'Historial de actividad' }} />
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: colors.bg }]}>
         {esAdmin && (
           <View style={styles.filterRow}>
             <TouchableOpacity
-              style={[styles.filterBtn, !soloMio && styles.filterActive]}
+              style={[styles.filterBtn, { backgroundColor: colors.card }, !soloMio && styles.filterActive]}
               onPress={() => setSoloMio(false)}
             >
               <Text style={[styles.filterText, !soloMio && styles.filterTextActive]}>Todos</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.filterBtn, soloMio && styles.filterActive]}
+              style={[styles.filterBtn, { backgroundColor: colors.card }, soloMio && styles.filterActive]}
               onPress={() => setSoloMio(true)}
             >
               <Text style={[styles.filterText, soloMio && styles.filterTextActive]}>Solo yo</Text>
@@ -103,7 +105,7 @@ export default function ActividadScreen() {
               const iconName = MODULO_ICON[item.modulo] ?? 'ellipse-outline';
               const accionColor = ACCION_COLOR[item.accion] ?? colors.textMuted;
               return (
-                <View style={styles.card}>
+                <View style={[styles.card, { backgroundColor: colors.card }]}>
                   <View style={[styles.iconBox, { backgroundColor: accionColor + '18' }]}>
                     <Ionicons name={iconName} size={20} color={accionColor} />
                   </View>

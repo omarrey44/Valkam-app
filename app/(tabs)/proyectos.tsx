@@ -15,12 +15,14 @@ import GradientCard from '../../components/GradientCard';
 import { useAuth } from '../../lib/auth';
 import { supabase } from '../../lib/supabase';
 import { colors, estadoProyectoColor, font, gradients, radius, shadow } from '../../lib/theme';
+import { useTheme } from '../../lib/themeContext';
 import { Proyecto } from '../../lib/types';
 
 const FILTROS_PROY = ['todos', 'programado', 'en_proceso', 'validacion', 'completado'] as const;
 type FiltroProy = typeof FILTROS_PROY[number];
 
 export default function Proyectos() {
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { profile } = useAuth();
   const [data, setData] = useState<Proyecto[]>([]);
@@ -61,7 +63,7 @@ export default function Proyectos() {
 
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.bg }]}
       contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: 130 }}
       showsVerticalScrollIndicator={false}
     >
@@ -115,7 +117,7 @@ export default function Proyectos() {
 
       {/* Proyectos */}
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Proyectos</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>Proyectos</Text>
       </View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 20, marginBottom: 12 }}>
         {FILTROS_PROY.map((f) => {
@@ -138,14 +140,14 @@ export default function Proyectos() {
             <TouchableOpacity
               key={p.id}
               activeOpacity={0.8}
-              style={styles.projCard}
+              style={[styles.projCard, { backgroundColor: colors.card }]}
               onPress={() => router.push(`/proyecto/${p.id}`)}
             >
               <View style={styles.projIcon}>
                 <Ionicons name="cube-outline" size={26} color={colors.primaryBright} />
               </View>
               <View style={{ flex: 1, marginLeft: 14 }}>
-                <Text style={styles.projName} numberOfLines={1}>
+                <Text style={[styles.projName, { color: colors.text }]} numberOfLines={1}>
                   {p.nombre_proyecto ?? 'Proyecto'}
                 </Text>
                 <Text style={styles.projSub} numberOfLines={1}>
@@ -168,7 +170,7 @@ export default function Proyectos() {
 
       {/* Accesos rápidos */}
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Accesos rápidos</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>Accesos rápidos</Text>
       </View>
       <View style={styles.quickRow}>
         <QuickTile
@@ -210,12 +212,13 @@ function QuickTile({
   subtitle: string;
   onPress: () => void;
 }) {
+  const { colors } = useTheme();
   return (
-    <TouchableOpacity activeOpacity={0.8} style={styles.quickTile} onPress={onPress}>
+    <TouchableOpacity activeOpacity={0.8} style={[styles.quickTile, { backgroundColor: colors.card }]} onPress={onPress}>
       <View style={[styles.quickIcon, { backgroundColor: tint + '15' }]}>
         <Ionicons name={icon} size={22} color={tint} />
       </View>
-      <Text style={styles.quickTitle}>{title}</Text>
+      <Text style={[styles.quickTitle, { color: colors.text }]}>{title}</Text>
       <Text style={styles.quickSub} numberOfLines={1}>
         {subtitle}
       </Text>

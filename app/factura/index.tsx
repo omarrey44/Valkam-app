@@ -13,9 +13,11 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { supabase } from '../../lib/supabase';
 import { colors, estadoFacturaColor, font, gradients, radius, shadow } from '../../lib/theme';
+import { useTheme } from '../../lib/themeContext';
 import { Factura } from '../../lib/types';
 
 export default function FacturaList() {
+  const { colors } = useTheme();
   const [data, setData] = useState<Factura[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -56,7 +58,7 @@ export default function FacturaList() {
     .reduce((s, f) => s + f.monto, 0);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.bg }]}>
       <FlatList
         data={data}
         keyExtractor={(f) => f.id}
@@ -77,12 +79,12 @@ export default function FacturaList() {
         renderItem={({ item }) => {
           const est = estadoMostrar(item);
           return (
-            <TouchableOpacity activeOpacity={0.85} style={styles.card} onPress={() => router.push(`/factura/${item.id}`)}>
+            <TouchableOpacity activeOpacity={0.85} style={[styles.card, { backgroundColor: colors.card }]} onPress={() => router.push(`/factura/${item.id}`)}>
               <View style={styles.tile}>
                 <Ionicons name="cash-outline" size={24} color={colors.success} />
               </View>
               <View style={{ flex: 1, marginLeft: 14 }}>
-                <Text style={styles.numero}>{item.numero_factura ?? 'Factura'}</Text>
+                <Text style={[styles.numero, { color: colors.text }]}>{item.numero_factura ?? 'Factura'}</Text>
                 <Text style={styles.sub} numberOfLines={1}>{item.proyectos?.clientes?.empresa ?? '—'}</Text>
                 <Text style={styles.monto}>
                   {item.moneda} {item.monto.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
