@@ -14,10 +14,15 @@ import {
 } from 'react-native';
 import DateField from './DateField';
 import { FieldIcon, SelectIcon } from './FieldIcon';
+import SelectOrText from './SelectOrText';
+import { logActividad } from '../lib/actividad';
 import { supabase } from '../lib/supabase';
 import { formatMoney, parseMoney } from '../lib/money';
 import { colors, font, gradients, radius, shadow } from '../lib/theme';
 import { Cliente, Cotizacion, CotizacionItem, Moneda } from '../lib/types';
+
+const TERMINOS = ['100% anticipo', '50% anticipo / 50% entrega', '30% anticipo / 70% entrega', 'Neto 30', 'Neto 60', 'Contra entrega'];
+const TIEMPOS  = ['1 semana', '2 semanas', '3 semanas', '1 mes', '2 meses', '3 meses', '6 meses', 'A definir'];
 
 const MONEDAS: { v: Moneda; icon: keyof typeof Ionicons.glyphMap }[] = [
   { v: 'MXN', icon: 'cash-outline' },
@@ -153,7 +158,10 @@ export default function CotizacionForm({
     setLoading(true);
     if (cotizacionId) {
       const { error } = await supabase.from('cotizaciones').update(payload).eq('id', cotizacionId);
-      if (!error) await syncItems(cotizacionId);
+      if (!error) {
+        await syncItems(cotizacionId);
+        logActividad('editó', 'cotizacion', cotizacionId, `Cotización: ${f.titulo}`);
+      }
       setLoading(false);
       if (error) return Alert.alert('Error', error.message);
       onSaved(cotizacionId);
@@ -164,7 +172,11 @@ export default function CotizacionForm({
         .insert({ ...payload, cotizado_por: u.user?.id, estado: 'pendiente' })
         .select('id')
         .single();
-      if (!error && data) await syncItems((data as { id: string }).id);
+      if (!error && data) {
+        const newId = (data as { id: string }).id;
+        await syncItems(newId);
+        logActividad('creó', 'cotizacion', newId, `Cotización: ${f.titulo}`);
+      }
       setLoading(false);
       if (error) return Alert.alert('Error', error.message);
       onSaved((data as { id: string }).id);
@@ -283,19 +295,19 @@ export default function CotizacionForm({
         <Text style={styles.totalValue}>{fmt(montoFinal)}</Text>
       </View>
 
-      <FieldIcon
+      <SelectOrText
         label="Términos de pago"
-        icon="wallet-outline"
         value={f.terminos_pago}
-        onChangeText={(v) => set('terminos_pago', v)}
-        placeholder="50% anticipo, 50% contra entrega"
+        onChange={(v) => set('terminos_pago', v)}
+        options={TERMINOS}
+        placeholder="Ej. 40% anticipo, 60% contra entrega"
       />
-      <FieldIcon
+      <SelectOrText
         label="Tiempo de entrega"
-        icon="time-outline"
         value={f.tiempo_entrega}
-        onChangeText={(v) => set('tiempo_entrega', v)}
-        placeholder="4-6 semanas laborables"
+        onChange={(v) => set('tiempo_entrega', v)}
+        options={TIEMPOS}
+        placeholder="Ej. 4-6 semanas laborables"
       />
       <FieldIcon
         label="Detalles técnicos"

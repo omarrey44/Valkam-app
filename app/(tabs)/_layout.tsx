@@ -5,10 +5,12 @@ import FloatingTabBar from '../../components/FloatingTabBar';
 import { useAuth } from '../../lib/auth';
 import { registerPushToken } from '../../lib/notifications';
 import { supabase } from '../../lib/supabase';
-import { colors, font } from '../../lib/theme';
+import { font } from '../../lib/theme';
+import { useTheme } from '../../lib/themeContext';
 
 export default function TabsLayout() {
   const { session, loading } = useAuth();
+  const { colors } = useTheme();
   const [pendientes, setPendientes] = useState(0);
 
   async function refreshCount() {

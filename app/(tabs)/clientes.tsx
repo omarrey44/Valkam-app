@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Image,
   Linking,
   RefreshControl,
   StyleSheet,
@@ -51,6 +52,12 @@ export default function Clientes() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.topHeader}>
+        <Text style={styles.topTitle}>Clientes</Text>
+        <TouchableOpacity style={styles.addBtn} onPress={() => router.push('/cliente/nuevo')}>
+          <Ionicons name="add" size={28} color="#fff" />
+        </TouchableOpacity>
+      </View>
       <FlatList
         data={filtered}
         keyExtractor={(c) => c.id}
@@ -78,9 +85,13 @@ export default function Clientes() {
             style={styles.card}
             onPress={() => router.push(`/cliente/${item.id}`)}
           >
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>{item.empresa.charAt(0).toUpperCase()}</Text>
-            </View>
+            {item.logo_url ? (
+              <Image source={{ uri: item.logo_url }} style={styles.avatar} />
+            ) : (
+              <View style={styles.avatar}>
+                <Text style={styles.avatarText}>{item.empresa.charAt(0).toUpperCase()}</Text>
+              </View>
+            )}
             <View style={{ flex: 1, marginLeft: 14 }}>
               <View style={styles.empresaRow}>
                 <Text style={styles.empresa} numberOfLines={1}>
@@ -112,9 +123,6 @@ export default function Clientes() {
           </TouchableOpacity>
         )}
       />
-      <TouchableOpacity style={styles.fab} onPress={() => router.push('/cliente/nuevo')}>
-        <Ionicons name="add" size={32} color="#fff" />
-      </TouchableOpacity>
     </View>
   );
 }
@@ -157,13 +165,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   empty: { textAlign: 'center', color: colors.textMuted, fontFamily: font.regular, marginTop: 40 },
-  fab: {
-    position: 'absolute',
-    right: 20,
-    bottom: 100,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+  topHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 8,
+    backgroundColor: colors.bg,
+  },
+  topTitle: { fontSize: 26, fontFamily: font.black, color: colors.text },
+  addBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: colors.accent,
     alignItems: 'center',
     justifyContent: 'center',

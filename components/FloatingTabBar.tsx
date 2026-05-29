@@ -1,9 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, font, radius, shadow } from '../lib/theme';
+import { useTheme } from '../lib/themeContext';
+import { font, radius, shadow } from '../lib/theme';
 
-// Tipo mínimo del tab bar (evita dependencia directa de @react-navigation/bottom-tabs)
 type TabBarProps = {
   state: { index: number; routes: { key: string; name: string }[] };
   descriptors: Record<string, { options: { title?: string; tabBarBadge?: number | string } }>;
@@ -23,10 +23,11 @@ const ICONS: Record<string, { on: keyof typeof Ionicons.glyphMap; off: keyof typ
 
 export default function FloatingTabBar({ state, descriptors, navigation }: TabBarProps) {
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
 
   return (
     <View style={[styles.outer, { paddingBottom: Math.max(insets.bottom, 10) }]} pointerEvents="box-none">
-      <View style={styles.bar}>
+      <View style={[styles.bar, { backgroundColor: colors.card }]}>
         {state.routes.map((route, index) => {
           const { options } = descriptors[route.key];
           const label = (options.title ?? route.name) as string;
@@ -48,7 +49,7 @@ export default function FloatingTabBar({ state, descriptors, navigation }: TabBa
               activeOpacity={0.7}
               style={styles.item}
             >
-              <View style={[styles.pill, focused && styles.pillActive]}>
+              <View style={[styles.pill, focused && { backgroundColor: colors.primaryBright + '20' }]}>
                 <View>
                   <Ionicons
                     name={focused ? icons.on : icons.off}
@@ -56,16 +57,13 @@ export default function FloatingTabBar({ state, descriptors, navigation }: TabBa
                     color={focused ? colors.primaryBright : colors.textFaint}
                   />
                   {badge != null && (
-                    <View style={styles.badge}>
+                    <View style={[styles.badge, { backgroundColor: colors.danger }]}>
                       <Text style={styles.badgeText}>{badge}</Text>
                     </View>
                   )}
                 </View>
               </View>
-              <Text
-                style={[styles.label, { color: focused ? colors.primaryBright : colors.textFaint }]}
-                numberOfLines={1}
-              >
+              <Text style={[styles.label, { color: focused ? colors.primaryBright : colors.textFaint }]} numberOfLines={1}>
                 {label}
               </Text>
             </TouchableOpacity>
@@ -88,19 +86,13 @@ const styles = StyleSheet.create({
   },
   bar: {
     flexDirection: 'row',
-    backgroundColor: colors.card,
     borderRadius: radius.xl,
     paddingVertical: 10,
     paddingHorizontal: 6,
     ...shadow.float,
   },
   item: { flex: 1, alignItems: 'center', gap: 3 },
-  pill: {
-    paddingHorizontal: 18,
-    paddingVertical: 6,
-    borderRadius: radius.pill,
-  },
-  pillActive: { backgroundColor: '#EAF1FE' },
+  pill: { paddingHorizontal: 18, paddingVertical: 6, borderRadius: radius.pill },
   label: { fontSize: 11, fontFamily: font.semibold },
   badge: {
     position: 'absolute',
@@ -110,7 +102,6 @@ const styles = StyleSheet.create({
     height: 16,
     paddingHorizontal: 4,
     borderRadius: 8,
-    backgroundColor: colors.danger,
     alignItems: 'center',
     justifyContent: 'center',
   },

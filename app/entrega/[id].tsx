@@ -1,11 +1,14 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import DateField from '../../components/DateField';
 import GradientHeader from '../../components/GradientHeader';
+import SignaturePad from '../../components/SignaturePad';
 import { Button, Card, Field } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
-import { colors, font, gradients } from '../../lib/theme';
+import { uploadSignature } from '../../lib/upload';
+import { colors, font, gradients, radius, shadow } from '../../lib/theme';
 import { Entrega, Proyecto } from '../../lib/types';
 
 function hoy() {
@@ -18,8 +21,15 @@ export default function EntregaScreen() {
   const [previa, setPrevia] = useState<Entrega | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [uploadingFirma, setUploadingFirma] = useState(false);
+  const [firmaConfirmada, setFirmaConfirmada] = useState(false);
 
-  const [f, setF] = useState({ fecha_entrega: hoy(), recibido_por: '', notas: '', firma_url: '' });
+  const [f, setF] = useState({
+    fecha_entrega: hoy(),
+    recibido_por: '',
+    notas: '',
+    firma_url: '',
+  });
 
   const load = useCallback(async () => {
     const { data: p } = await supabase.from('proyectos').select('*, clientes(empresa)').eq('id', id).single();
@@ -34,6 +44,7 @@ export default function EntregaScreen() {
         notas: en.notas ?? '',
         firma_url: en.firma_url ?? '',
       });
+      if (en.firma_url) setFirmaConfirmada(true);
     }
     setLoading(false);
   }, [id]);
@@ -46,6 +57,19 @@ export default function EntregaScreen() {
 
   function set<K extends keyof typeof f>(k: K, v: (typeof f)[K]) {
     setF((prev) => ({ ...prev, [k]: v }));
+  }
+
+  async function onFirmaConfirmada(paths: string[]) {
+    setUploadingFirma(true);
+    try {
+      const url = await uploadSignature(paths, `firma_${id}_${Date.now()}`);
+      set('firma_url', url);
+      setFirmaConfirmada(true);
+    } catch (e: any) {
+      Alert.alert('Error', e.message ?? 'No se pudo guardar la firma.');
+    } finally {
+      setUploadingFirma(false);
+    }
   }
 
   async function registrar() {
@@ -98,11 +122,37 @@ export default function EntregaScreen() {
         <DateField label="Fecha de entrega" value={f.fecha_entrega} onChange={(v) => set('fecha_entrega', v)} />
         <Field label="Recibido por" value={f.recibido_por} onChangeText={(v) => set('recibido_por', v)} placeholder="Nombre de quien recibe" />
         <Field label="Notas / observaciones" value={f.notas} onChangeText={(v) => set('notas', v)} multiline />
-        <Field label="Firma / acuse (URL)" value={f.firma_url} onChangeText={(v) => set('firma_url', v)} autoCapitalize="none" placeholder="Liga a foto/PDF de acuse (opcional)" />
-        <Text style={styles.hint}>Al registrar, el proyecto pasa a “Completado”.</Text>
       </Card>
 
-      <Button title={previa ? 'Actualizar entrega' : '✔ Registrar entrega'} onPress={registrar} loading={busy} />
+      {/* Firma digital */}
+      <View style={styles.firmaSection}>
+        <Text style={styles.firmaTitle}>Firma digital</Text>
+
+        {firmaConfirmada ? (
+          <View style={styles.firmaOk}>
+            <Ionicons name="checkmark-circle" size={24} color={colors.success} />
+            <Text style={styles.firmaOkText}>Firma capturada correctamente</Text>
+            <TouchableOpacity onPress={() => { setFirmaConfirmada(false); set('firma_url', ''); }} hitSlop={8}>
+              <Text style={styles.firmaRetry}>Volver a firmar</Text>
+            </TouchableOpacity>
+          </View>
+        ) : uploadingFirma ? (
+          <View style={styles.firmaOk}>
+            <ActivityIndicator color={colors.primaryBright} />
+            <Text style={styles.firmaOkText}>Guardando firma…</Text>
+          </View>
+        ) : (
+          <SignaturePad onConfirm={onFirmaConfirmada} hasExisting={!!previa?.firma_url} />
+        )}
+      </View>
+
+      <Text style={styles.hint}>Al registrar, el proyecto pasa a "Completado".</Text>
+
+      <Button
+        title={previa ? 'Actualizar entrega' : '✔ Registrar entrega'}
+        onPress={registrar}
+        loading={busy}
+      />
     </ScrollView>
   );
 }
@@ -110,5 +160,16 @@ export default function EntregaScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg },
-  hint: { fontFamily: font.regular, color: colors.textMuted, fontSize: 13, marginTop: 4 },
+  firmaSection: {
+    backgroundColor: colors.card,
+    borderRadius: radius.lg,
+    padding: 16,
+    marginBottom: 12,
+    ...shadow.card,
+  },
+  firmaTitle: { fontSize: 15, fontFamily: font.bold, color: colors.text, marginBottom: 12 },
+  firmaOk: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 12 },
+  firmaOkText: { fontFamily: font.medium, color: colors.text, flex: 1 },
+  firmaRetry: { fontFamily: font.semibold, color: colors.primaryBright, fontSize: 13 },
+  hint: { fontFamily: font.regular, color: colors.textMuted, fontSize: 13, marginBottom: 12, textAlign: 'center' },
 });

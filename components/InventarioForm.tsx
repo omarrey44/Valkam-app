@@ -1,10 +1,15 @@
 import { useState } from 'react';
 import { Alert, ScrollView, StyleSheet } from 'react-native';
 import { Button, Field } from './ui';
+import SelectOrText from './SelectOrText';
+import { logActividad } from '../lib/actividad';
 import { formatMoney, parseMoney } from '../lib/money';
 import { supabase } from '../lib/supabase';
 import { colors } from '../lib/theme';
 import { InventarioItem } from '../lib/types';
+
+const CATEGORIAS = ['Materia prima', 'Herramienta', 'Consumible', 'Refacción', 'Equipo', 'Electrónico', 'Estructura'];
+const UNIDADES   = ['pza', 'kg', 'g', 'm', 'm²', 'm³', 'lt', 'ml', 'caja', 'juego', 'hr'];
 
 export default function InventarioForm({
   initial,
@@ -50,6 +55,7 @@ export default function InventarioForm({
       const { error } = await supabase.from('inventario').update(payload).eq('id', itemId);
       setLoading(false);
       if (error) return Alert.alert('Error', error.message);
+      logActividad('editó', 'inventario', itemId, `Artículo: ${payload.nombre}`);
       onSaved(itemId);
     } else {
       const { data: u } = await supabase.auth.getUser();
@@ -60,7 +66,9 @@ export default function InventarioForm({
         .single();
       setLoading(false);
       if (error) return Alert.alert('Error', error.message);
-      onSaved((data as { id: string }).id);
+      const newId = (data as { id: string }).id;
+      logActividad('creó', 'inventario', newId, `Artículo: ${payload.nombre}`);
+      onSaved(newId);
     }
   }
 
@@ -68,10 +76,10 @@ export default function InventarioForm({
     <ScrollView style={styles.container} contentContainerStyle={{ padding: 16, paddingBottom: 48 }}>
       <Field label="Nombre *" value={f.nombre} onChangeText={(v) => set('nombre', v)} />
       <Field label="SKU / Código" value={f.sku} onChangeText={(v) => set('sku', v)} autoCapitalize="characters" />
-      <Field label="Categoría" value={f.categoria} onChangeText={(v) => set('categoria', v)} placeholder="Sensores, PLCs, Motores..." />
+      <SelectOrText label="Categoría" value={f.categoria} onChange={(v) => set('categoria', v)} options={CATEGORIAS} placeholder="Escribe una categoría..." />
       <Field label="Descripción" value={f.descripcion} onChangeText={(v) => set('descripcion', v)} multiline />
       <Field label="Cantidad (existencias)" value={f.cantidad} onChangeText={(v) => set('cantidad', v)} keyboardType="decimal-pad" />
-      <Field label="Unidad" value={f.unidad} onChangeText={(v) => set('unidad', v)} placeholder="pza, m, kg..." />
+      <SelectOrText label="Unidad" value={f.unidad} onChange={(v) => set('unidad', v)} options={UNIDADES} placeholder="Escribe la unidad..." />
       <Field label="Stock mínimo" value={f.stock_minimo} onChangeText={(v) => set('stock_minimo', v)} keyboardType="decimal-pad" />
       <Field label="Precio unitario" value={formatMoney(f.precio_unitario)} onChangeText={(v) => set('precio_unitario', parseMoney(v))} keyboardType="decimal-pad" />
       <Field label="Ubicación" value={f.ubicacion} onChangeText={(v) => set('ubicacion', v)} placeholder="Almacén A, Estante 3..." />

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from './supabase';
+import { registerPushToken } from './notifications';
 import { Profile } from './types';
 
 interface AuthState {
@@ -26,6 +27,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .eq('id', userId)
       .single();
     setProfile((data as Profile) ?? null);
+    registerPushToken(userId);
   }
 
   useEffect(() => {

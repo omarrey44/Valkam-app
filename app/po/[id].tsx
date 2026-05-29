@@ -1,18 +1,22 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Stack, router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Linking,
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import { Button, Card } from '../../components/ui';
 import GradientHeader from '../../components/GradientHeader';
 import POForm from '../../components/POForm';
 import { supabase } from '../../lib/supabase';
-import { colors, gradients } from '../../lib/theme';
+import { uploadDocument } from '../../lib/upload';
+import { colors, font, gradients, radius, shadow } from '../../lib/theme';
 import { OrdenCompra, Proyecto } from '../../lib/types';
 
 export default function PODetalle() {
@@ -22,6 +26,7 @@ export default function PODetalle() {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const load = useCallback(async () => {
     const { data } = await supabase
@@ -44,6 +49,22 @@ export default function PODetalle() {
       load();
     }, [load])
   );
+
+  async function adjuntarArchivo() {
+    if (!po) return;
+    setUploading(true);
+    try {
+      const res = await uploadDocument('documentos', `po_${id}`);
+      if (!res) return;
+      const { error } = await supabase.from('ordenes_compra').update({ archivo_adjunto: res.url }).eq('id', id);
+      if (error) throw error;
+      setPO((prev) => prev ? { ...prev, archivo_adjunto: res.url } : prev);
+    } catch (e: any) {
+      Alert.alert('Error', e.message ?? 'No se pudo subir el archivo.');
+    } finally {
+      setUploading(false);
+    }
+  }
 
   async function generarProyecto() {
     if (!po) return;
@@ -107,8 +128,33 @@ export default function PODetalle() {
         <Campo label="Fecha recepción" value={po.fecha_recepcion} />
         {!!po.fecha_entrega_esperada && <Campo label="Entrega esperada" value={po.fecha_entrega_esperada} />}
         {!!po.terminos_pago && <Campo label="Términos de pago" value={po.terminos_pago} />}
-        {!!po.archivo_adjunto && <Campo label="Archivo" value={po.archivo_adjunto} />}
       </Card>
+
+      {/* Archivo adjunto */}
+      <View style={styles.adjuntoCard}>
+        <Text style={styles.adjuntoTitle}>Archivo adjunto</Text>
+        {po.archivo_adjunto ? (
+          <View style={styles.adjuntoRow}>
+            <Ionicons name="document-attach-outline" size={22} color={colors.primaryBright} />
+            <TouchableOpacity style={{ flex: 1 }} onPress={() => Linking.openURL(po.archivo_adjunto!)}>
+              <Text style={styles.adjuntoLink} numberOfLines={1}>
+                {po.archivo_adjunto.split('/').pop()}
+              </Text>
+              <Text style={styles.adjuntoSub}>Toca para abrir</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={adjuntarArchivo} disabled={uploading} hitSlop={8}>
+              <Ionicons name="refresh-outline" size={20} color={colors.textMuted} />
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <TouchableOpacity style={styles.adjuntoEmpty} onPress={adjuntarArchivo} disabled={uploading}>
+            <Ionicons name="cloud-upload-outline" size={28} color={colors.primaryBright} />
+            <Text style={styles.adjuntoEmptyText}>
+              {uploading ? 'Subiendo…' : 'Adjuntar PO (PDF, imagen, etc.)'}
+            </Text>
+          </TouchableOpacity>
+        )}
+      </View>
 
       <View style={{ gap: 10 }}>
         {proyecto ? (
@@ -140,4 +186,26 @@ const styles = StyleSheet.create({
   monto: { fontSize: 22, fontWeight: '900', color: colors.primary, marginTop: 8 },
   campoLabel: { fontSize: 12, fontWeight: '700', color: colors.textMuted, textTransform: 'uppercase' },
   campoValue: { fontSize: 15, color: colors.text, marginTop: 2 },
+  adjuntoCard: {
+    backgroundColor: colors.card,
+    borderRadius: radius.lg,
+    padding: 16,
+    marginBottom: 12,
+    ...shadow.card,
+  },
+  adjuntoTitle: { fontSize: 13, fontFamily: font.semibold, color: colors.textMuted, marginBottom: 12 },
+  adjuntoRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  adjuntoLink: { fontSize: 14, fontFamily: font.bold, color: colors.primaryBright },
+  adjuntoSub: { fontSize: 12, fontFamily: font.regular, color: colors.textMuted, marginTop: 2 },
+  adjuntoEmpty: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 20,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    borderStyle: 'dashed',
+    borderRadius: radius.md,
+  },
+  adjuntoEmptyText: { fontFamily: font.medium, color: colors.textMuted, fontSize: 14 },
 });

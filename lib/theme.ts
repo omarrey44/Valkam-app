@@ -1,4 +1,4 @@
-export const colors = {
+export const lightColors = {
   primary: '#0B5FA5',
   primaryDark: '#084A82',
   primaryBright: '#2563EB',
@@ -14,6 +14,25 @@ export const colors = {
   success: '#16A34A',
   warning: '#D97706',
 };
+
+export const darkColors = {
+  primary: '#1D4ED8',
+  primaryDark: '#1E40AF',
+  primaryBright: '#60A5FA',
+  accent: '#F2A007',
+  accentSoft: '#2D2000',
+  bg: '#0F172A',
+  card: '#1E293B',
+  border: '#334155',
+  text: '#F1F5F9',
+  textMuted: '#94A3B8',
+  textFaint: '#475569',
+  danger: '#F87171',
+  success: '#4ADE80',
+  warning: '#FCD34D',
+};
+
+export const colors = lightColors;
 
 // Degradados (usar con expo-linear-gradient, start top-left → end bottom-right)
 export const gradients = {

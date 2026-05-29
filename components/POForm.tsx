@@ -12,10 +12,14 @@ import {
 import { Button, Field } from './ui';
 import DateField from './DateField';
 import SegmentSelect from './SegmentSelect';
+import SelectOrText from './SelectOrText';
+import { logActividad } from '../lib/actividad';
 import { formatMoney, parseMoney } from '../lib/money';
 import { supabase } from '../lib/supabase';
 import { colors, estadoPOColor } from '../lib/theme';
 import { Cotizacion, Moneda, OrdenCompra } from '../lib/types';
+
+const TERMINOS = ['100% anticipo', '50% anticipo / 50% entrega', '30% anticipo / 70% entrega', 'Neto 30', 'Neto 60', 'Contra entrega'];
 
 const MONEDAS: Moneda[] = ['MXN', 'USD', 'EUR'];
 
@@ -107,6 +111,7 @@ export default function POForm({
       const { error } = await supabase.from('ordenes_compra').update(payload).eq('id', poId);
       setLoading(false);
       if (error) return Alert.alert('Error', error.message);
+      logActividad('editó', 'po', poId, `PO orden de compra`);
       onSaved(poId);
     } else {
       const { data: u } = await supabase.auth.getUser();
@@ -117,7 +122,9 @@ export default function POForm({
         .single();
       setLoading(false);
       if (error) return Alert.alert('Error', error.message);
-      onSaved((data as { id: string }).id);
+      const newId = (data as { id: string }).id;
+      logActividad('creó', 'po', newId, `PO orden de compra`);
+      onSaved(newId);
     }
   }
 
@@ -147,7 +154,7 @@ export default function POForm({
 
       <DateField label="Fecha recepción" value={f.fecha_recepcion} onChange={(v) => set('fecha_recepcion', v)} />
       <DateField label="Fecha entrega esperada" value={f.fecha_entrega_esperada} onChange={(v) => set('fecha_entrega_esperada', v)} clearable />
-      <Field label="Términos de pago" value={f.terminos_pago} onChangeText={(v) => set('terminos_pago', v)} />
+      <SelectOrText label="Términos de pago" value={f.terminos_pago} onChange={(v) => set('terminos_pago', v)} options={TERMINOS} />
       <Field label="Archivo adjunto (URL PDF)" value={f.archivo_adjunto} onChangeText={(v) => set('archivo_adjunto', v)} autoCapitalize="none" />
 
       <SegmentSelect

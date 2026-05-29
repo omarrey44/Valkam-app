@@ -14,6 +14,7 @@ import { Button, Card } from '../../components/ui';
 import FacturaForm from '../../components/FacturaForm';
 import GradientHeader from '../../components/GradientHeader';
 import { useAuth } from '../../lib/auth';
+import { buildFacturaHtml, compartirFacturaPdf } from '../../lib/facturaPdf';
 import { supabase } from '../../lib/supabase';
 import { colors, gradients } from '../../lib/theme';
 import { Factura } from '../../lib/types';
@@ -25,6 +26,7 @@ export default function FacturaDetalle() {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [pdfBusy, setPdfBusy] = useState(false);
 
   const puedeEditar = profile?.rol === 'administrador' || profile?.rol === 'aprobador';
 
@@ -53,6 +55,21 @@ export default function FacturaDetalle() {
     setBusy(false);
     if (error) return Alert.alert('Error', error.message);
     load();
+  }
+
+  async function exportarPdf() {
+    if (!f) return;
+    setPdfBusy(true);
+    try {
+      const empresa = f.proyectos?.clientes?.empresa ?? '—';
+      const proyecto = f.proyectos?.nombre_proyecto ?? '—';
+      const html = buildFacturaHtml(f, empresa, proyecto);
+      await compartirFacturaPdf(html);
+    } catch (e: any) {
+      Alert.alert('Error', e.message ?? 'No se pudo generar el PDF.');
+    } finally {
+      setPdfBusy(false);
+    }
   }
 
   function confirmarEliminar() {
@@ -123,16 +140,20 @@ export default function FacturaDetalle() {
         {!!f.terminos_pago && <Campo label="Términos de pago" value={f.terminos_pago} />}
       </Card>
 
-      {puedeEditar ? (
-        <View style={{ gap: 10 }}>
-          {f.estado !== 'pagada' && (
-            <Button title="✔ Marcar como pagada" onPress={marcarPagada} loading={busy} />
-          )}
-          <Button title="Editar factura" variant="secondary" onPress={() => setEditing(true)} />
-        </View>
-      ) : (
-        <Text style={styles.nota}>Solo administrador/aprobador puede editar facturas.</Text>
-      )}
+      <View style={{ gap: 10 }}>
+        <Button title={pdfBusy ? 'Generando PDF…' : 'Compartir PDF'} variant="secondary" onPress={exportarPdf} loading={pdfBusy} />
+        {puedeEditar && (
+          <>
+            {f.estado !== 'pagada' && (
+              <Button title="✔ Marcar como pagada" onPress={marcarPagada} loading={busy} />
+            )}
+            <Button title="Editar factura" variant="secondary" onPress={() => setEditing(true)} />
+          </>
+        )}
+        {!puedeEditar && (
+          <Text style={styles.nota}>Solo administrador/aprobador puede editar facturas.</Text>
+        )}
+      </View>
     </ScrollView>
   );
 }

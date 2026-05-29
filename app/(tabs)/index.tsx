@@ -60,6 +60,12 @@ export default function Cotizaciones() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.topHeader}>
+        <Text style={styles.topTitle}>Cotizaciones</Text>
+        <TouchableOpacity style={styles.addBtn} onPress={() => router.push('/cotizacion/nueva')}>
+          <Ionicons name="add" size={28} color="#fff" />
+        </TouchableOpacity>
+      </View>
       <FlatList
         data={filtered}
         keyExtractor={(c) => c.id}
@@ -139,9 +145,6 @@ export default function Cotizaciones() {
           </TouchableOpacity>
         )}
       />
-      <TouchableOpacity style={styles.fab} onPress={() => router.push('/cotizacion/nueva')}>
-        <Ionicons name="add" size={32} color="#fff" />
-      </TouchableOpacity>
     </View>
   );
 }
@@ -197,13 +200,20 @@ const styles = StyleSheet.create({
   pill: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: radius.pill },
   pillText: { fontSize: 10, fontFamily: font.bold, letterSpacing: 0.3 },
   empty: { textAlign: 'center', color: colors.textMuted, fontFamily: font.regular, marginTop: 40 },
-  fab: {
-    position: 'absolute',
-    right: 20,
-    bottom: 100,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+  topHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 8,
+    backgroundColor: colors.bg,
+  },
+  topTitle: { fontSize: 26, fontFamily: font.black, color: colors.text },
+  addBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: colors.accent,
     alignItems: 'center',
     justifyContent: 'center',

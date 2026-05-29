@@ -3,10 +3,14 @@ import { Alert, ScrollView, StyleSheet } from 'react-native';
 import { Button, Field } from './ui';
 import DateField from './DateField';
 import SegmentSelect from './SegmentSelect';
+import SelectOrText from './SelectOrText';
+import { logActividad } from '../lib/actividad';
 import { formatMoney, parseMoney } from '../lib/money';
 import { supabase } from '../lib/supabase';
 import { colors, estadoFacturaColor } from '../lib/theme';
 import { Factura, Moneda } from '../lib/types';
+
+const TERMINOS = ['100% anticipo', '50% anticipo / 50% entrega', '30% anticipo / 70% entrega', 'Neto 30', 'Neto 60', 'Contra entrega'];
 
 const MONEDAS: Moneda[] = ['MXN', 'USD', 'EUR'];
 
@@ -57,6 +61,7 @@ export default function FacturaForm({
       .eq('id', facturaId);
     setLoading(false);
     if (error) return Alert.alert('Error', error.message);
+    logActividad('editó', 'factura', facturaId, `Factura: ${initial.numero_factura ?? facturaId}`);
     onSaved();
   }
 
@@ -69,7 +74,7 @@ export default function FacturaForm({
         value={f.moneda}
         onChange={(v) => set('moneda', v as Moneda)}
       />
-      <Field label="Términos de pago" value={f.terminos_pago} onChangeText={(v) => set('terminos_pago', v)} />
+      <SelectOrText label="Términos de pago" value={f.terminos_pago} onChange={(v) => set('terminos_pago', v)} options={TERMINOS} />
       <DateField label="Fecha emisión" value={f.fecha_emision} onChange={(v) => set('fecha_emision', v)} />
       <DateField label="Fecha vencimiento" value={f.fecha_vencimiento} onChange={(v) => set('fecha_vencimiento', v)} clearable />
       <DateField label="Fecha pago" value={f.fecha_pago} onChange={(v) => set('fecha_pago', v)} clearable />

@@ -30,7 +30,21 @@
       "expo-font",
       "expo-sharing",
       "expo-notifications",
-      "@react-native-community/datetimepicker"
-    ]
+      "@react-native-community/datetimepicker",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Valmak necesita acceso a tu galería para subir fotos.",
+          "cameraPermission": "Valmak necesita la cámara para tomar fotos de perfil."
+        }
+      ],
+      "expo-document-picker"
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "e5ec584b-fccb-4ddc-acfe-5b25973347cf"
+      }
+    }
   }
 }

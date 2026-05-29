@@ -15,6 +15,7 @@ export interface Profile {
   nombre: string | null;
   email: string | null;
   rol: Rol;
+  avatar_url: string | null;
   creado_en: string;
 }
 
@@ -32,6 +33,7 @@ export interface Cliente {
   telefono: string | null;
   direccion: string | null;
   estado: EstadoCliente;
+  logo_url: string | null;
   creado_por: string | null;
   creado_en: string;
   actualizado_en: string;

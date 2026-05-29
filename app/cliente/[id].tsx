@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Image,
   Linking,
   ScrollView,
   StyleSheet,
@@ -127,9 +128,13 @@ export default function ClienteDetalle() {
       {/* Cabecera */}
       <View style={styles.headCard}>
         <View style={styles.headTop}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{cliente.empresa.charAt(0).toUpperCase()}</Text>
-          </View>
+          {cliente.logo_url ? (
+            <Image source={{ uri: cliente.logo_url }} style={styles.avatar} />
+          ) : (
+            <View style={styles.avatar}>
+              <Text style={styles.avatarText}>{cliente.empresa.charAt(0).toUpperCase()}</Text>
+            </View>
+          )}
           <View style={{ flex: 1, marginLeft: 14 }}>
             <Text style={styles.empresa}>{cliente.empresa}</Text>
             {!!cliente.ingeniero && <Text style={styles.sub}>Ing. {cliente.ingeniero}</Text>}
