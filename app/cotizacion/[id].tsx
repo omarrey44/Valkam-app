@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Linking,
   ScrollView,
   StyleSheet,
   Text,
@@ -141,6 +142,19 @@ export default function CotizacionDetalle() {
     setBusy(false);
   }
 
+  function enviarWhatsApp() {
+    if (!c) return;
+    const telefono = (c as any).clientes?.telefono;
+    const digits = telefono ? telefono.replace(/\D/g, '') : '';
+    const num = digits.length === 10 ? `52${digits}` : digits;
+    const monto = `${c.moneda} ${c.monto.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`;
+    const msg = `Hola ${c.clientes?.empresa ?? ''}, le compartimos la cotización *${c.titulo}* por un total de *${monto}* (Rev. ${c.revision_current}). Quedamos a sus órdenes.`;
+    const url = num
+      ? `whatsapp://send?phone=${num}&text=${encodeURIComponent(msg)}`
+      : `whatsapp://send?text=${encodeURIComponent(msg)}`;
+    Linking.openURL(url).catch(() => Alert.alert('WhatsApp no disponible', 'Instala WhatsApp en el dispositivo.'));
+  }
+
   function enviarCorreo() {
     if (!c) return;
     const destino = c.clientes?.correo_principal;
@@ -236,6 +250,7 @@ export default function CotizacionDetalle() {
 
       <View style={{ gap: 10, marginBottom: 12 }}>
         <Button title="✉  Enviar por correo" onPress={enviarCorreo} loading={busy} />
+        <Button title="💬 Enviar por WhatsApp" variant="secondary" onPress={enviarWhatsApp} />
         <Button title="📄 Compartir PDF" variant="secondary" onPress={compartirPdf} loading={busy} />
         <Button title="Editar (nueva revisión)" variant="secondary" onPress={() => setEditing(true)} />
         <Button title="⧉ Duplicar cotización" variant="secondary" onPress={duplicar} loading={busy} />

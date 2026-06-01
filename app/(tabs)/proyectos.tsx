@@ -3,7 +3,6 @@ import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -19,7 +18,6 @@ import { useTheme } from '../../lib/themeContext';
 import { Proyecto } from '../../lib/types';
 
 const FILTROS_PROY = ['todos', 'programado', 'en_proceso', 'validacion', 'completado'] as const;
-type FiltroProy = typeof FILTROS_PROY[number];
 
 export default function Proyectos() {
   const { colors } = useTheme();
@@ -71,6 +69,9 @@ export default function Proyectos() {
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.push('/usuarios')} hitSlop={8}>
           <Ionicons name="menu" size={28} color={colors.text} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push('/buscar')} hitSlop={8} style={{ marginLeft: 12 }}>
+          <Ionicons name="search-outline" size={26} color={colors.text} />
         </TouchableOpacity>
         <View style={styles.headerRight}>
           <TouchableOpacity onPress={() => router.push('/(tabs)/pendientes')} hitSlop={8}>

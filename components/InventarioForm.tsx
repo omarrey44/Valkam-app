@@ -1,11 +1,13 @@
+import { Ionicons } from '@expo/vector-icons';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useState } from 'react';
-import { Alert, ScrollView, StyleSheet } from 'react-native';
+import { Alert, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Button, Field } from './ui';
 import SelectOrText from './SelectOrText';
 import { logActividad } from '../lib/actividad';
 import { formatMoney, parseMoney } from '../lib/money';
 import { supabase } from '../lib/supabase';
-import { colors } from '../lib/theme';
+import { colors, radius, shadow } from '../lib/theme';
 import { useTheme } from '../lib/themeContext';
 import { InventarioItem } from '../lib/types';
 
@@ -23,6 +25,21 @@ export default function InventarioForm({
 }) {
   const { colors } = useTheme();
   const [loading, setLoading] = useState(false);
+  const [scanning, setScanning] = useState(false);
+  const [camPerm, requestCamPerm] = useCameraPermissions();
+
+  async function openScanner() {
+    if (!camPerm?.granted) {
+      const { granted } = await requestCamPerm();
+      if (!granted) return Alert.alert('Permiso requerido', 'Necesitamos acceso a la cámara.');
+    }
+    setScanning(true);
+  }
+
+  function onBarcode(result: { data: string }) {
+    setScanning(false);
+    set('sku', result.data);
+  }
   const [f, setF] = useState({
     nombre: initial?.nombre ?? '',
     sku: initial?.sku ?? '',
@@ -77,7 +94,28 @@ export default function InventarioForm({
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.bg }]} contentContainerStyle={{ padding: 16, paddingBottom: 48 }}>
       <Field label="Nombre *" value={f.nombre} onChangeText={(v) => set('nombre', v)} />
-      <Field label="SKU / Código" value={f.sku} onChangeText={(v) => set('sku', v)} autoCapitalize="characters" />
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 8 }}>
+        <View style={{ flex: 1 }}>
+          <Field label="SKU / Código" value={f.sku} onChangeText={(v) => set('sku', v)} autoCapitalize="characters" />
+        </View>
+        <TouchableOpacity style={[styles.scanBtn, { backgroundColor: colors.card }]} onPress={openScanner}>
+          <Ionicons name="barcode-outline" size={24} color={colors.primaryBright} />
+        </TouchableOpacity>
+      </View>
+
+      <Modal visible={scanning} animationType="slide" onRequestClose={() => setScanning(false)}>
+        <View style={{ flex: 1, backgroundColor: '#000' }}>
+          <CameraView
+            style={{ flex: 1 }}
+            barcodeScannerSettings={{ barcodeTypes: ['qr', 'ean13', 'ean8', 'code128', 'code39', 'upc_a', 'upc_e'] }}
+            onBarcodeScanned={onBarcode}
+          />
+          <TouchableOpacity style={styles.closeScanner} onPress={() => setScanning(false)}>
+            <Ionicons name="close-circle" size={44} color="#fff" />
+            <Text style={{ color: '#fff', marginTop: 8, fontSize: 15 }}>Cancelar</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
       <SelectOrText label="Categoría" value={f.categoria} onChange={(v) => set('categoria', v)} options={CATEGORIAS} placeholder="Escribe una categoría..." />
       <Field label="Descripción" value={f.descripcion} onChangeText={(v) => set('descripcion', v)} multiline />
       <Field label="Cantidad (existencias)" value={f.cantidad} onChangeText={(v) => set('cantidad', v)} keyboardType="decimal-pad" />
@@ -92,4 +130,6 @@ export default function InventarioForm({
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
+  scanBtn: { width: 52, height: 52, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center', marginBottom: 16, ...shadow.card },
+  closeScanner: { position: 'absolute', bottom: 48, alignSelf: 'center', alignItems: 'center' },
 });

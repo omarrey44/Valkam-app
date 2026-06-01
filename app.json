@@ -38,6 +38,13 @@
           "cameraPermission": "Valmak necesita la cámara para tomar fotos de perfil."
         }
       ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Valmak necesita la cámara para escanear códigos de barras."
+        }
+      ],
+      "expo-local-authentication",
     ],
     "extra": {
       "router": {},

@@ -13,6 +13,7 @@ import DateField from './DateField';
 import SegmentSelect from './SegmentSelect';
 import UserPicker from './UserPicker';
 import { supabase } from '../lib/supabase';
+import { cancelTaskReminder, scheduleTaskReminder } from '../lib/recordatorios';
 import { colors, prioridadColor, estadoTareaColor } from '../lib/theme';
 import { Tarea } from '../lib/types';
 
@@ -88,13 +89,22 @@ export default function TareaModal({
       const { error } = await supabase.from('tareas').update(base).eq('id', tarea.id);
       setLoading(false);
       if (error) return Alert.alert('Error', error.message);
+      if (base.fecha_vencimiento && base.estado !== 'completada' && base.estado !== 'cancelada') {
+        scheduleTaskReminder(tarea.id, f.titulo, base.fecha_vencimiento);
+      } else {
+        cancelTaskReminder(tarea.id);
+      }
     } else {
       const { data: u } = await supabase.auth.getUser();
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('tareas')
-        .insert({ ...base, proyecto_id: proyectoId, creado_por: u.user?.id });
+        .insert({ ...base, proyecto_id: proyectoId, creado_por: u.user?.id })
+        .select('id').single();
       setLoading(false);
       if (error) return Alert.alert('Error', error.message);
+      if (base.fecha_vencimiento && data) {
+        scheduleTaskReminder((data as { id: string }).id, f.titulo, base.fecha_vencimiento);
+      }
     }
     onSaved();
   }

@@ -7,6 +7,7 @@ import SegmentSelect from './SegmentSelect';
 import { supabase } from '../lib/supabase';
 import { pickAndUpload } from '../lib/upload';
 import { logActividad } from '../lib/actividad';
+import { formatPhone } from '../lib/phone';
 import { Cliente } from '../lib/types';
 import { colors, estadoClienteColor, font, gradients, radius, shadow } from '../lib/theme';
 import { useTheme } from '../lib/themeContext';
@@ -111,7 +112,7 @@ export default function ClienteForm({
       <FieldIcon label="Descripción del proyecto" icon="create-outline" value={f.descripcion_proyecto ?? ''} onChangeText={(v) => set('descripcion_proyecto', v)} placeholder="Detalles del proyecto..." multiline />
       <FieldIcon label="Correo principal *" icon="mail-outline" iconTint={colors.success} iconBg="#DCFCE7" value={f.correo_principal} onChangeText={(v) => set('correo_principal', v)} autoCapitalize="none" keyboardType="email-address" placeholder="correo@empresa.com" />
       <FieldIcon label="Correos adicionales" icon="mail-open-outline" value={f.correos_adicionales ?? ''} onChangeText={(v) => set('correos_adicionales', v)} autoCapitalize="none" placeholder="separados por coma" />
-      <FieldIcon label="Teléfono" icon="call-outline" value={f.telefono ?? ''} onChangeText={(v) => set('telefono', v)} keyboardType="phone-pad" placeholder="614-000-0000" />
+      <FieldIcon label="Teléfono" icon="call-outline" value={f.telefono ?? ''} onChangeText={(v) => set('telefono', formatPhone(v))} keyboardType="phone-pad" placeholder="(614) 000-0000" />
       <FieldIcon label="Dirección" icon="location-outline" value={f.direccion ?? ''} onChangeText={(v) => set('direccion', v)} placeholder="Calle, ciudad..." multiline />
 
       <SegmentSelect
