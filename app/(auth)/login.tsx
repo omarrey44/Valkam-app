@@ -20,9 +20,8 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null);
   const [biometricAvail, setBiometricAvail] = useState(false);
 
-  if (session) return <Redirect href="/(tabs)" />;
-
   useEffect(() => {
+    if (session) return;
     isBiometricAvailable().then(async (avail) => {
       if (!avail) return;
       const enabled = await AsyncStorage.getItem(BIOMETRIC_KEY);
@@ -33,7 +32,9 @@ export default function Login() {
         setBiometricAvail(true);
       }
     });
-  }, []);
+  }, [session]);
+
+  if (session) return <Redirect href="/(tabs)" />;
 
   async function tryBiometric() {
     const ok = await authenticateWithBiometric();
