@@ -2,7 +2,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {
-  ActivityIndicator,
   FlatList,
   RefreshControl,
   ScrollView,
@@ -12,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import IconField from '../../components/IconField';
+import { SkeletonList } from '../../components/Skeleton';
 import { supabase } from '../../lib/supabase';
 import { colors, estadoColor, font, radius, shadow } from '../../lib/theme';
 import { useTheme } from '../../lib/themeContext';
@@ -48,7 +48,14 @@ export default function Cotizaciones() {
   const aprobadas = data.filter((c) => c.estado === 'aprobada').length;
 
   if (loading)
-    return <View style={[styles.center, { backgroundColor: colors.bg }]}><ActivityIndicator size="large" color={colors.primaryBright} /></View>;
+    return (
+      <View style={[styles.container, { backgroundColor: colors.bg }]}>
+        <View style={[styles.topHeader, { backgroundColor: colors.bg }]}>
+          <Text style={[styles.topTitle, { color: colors.text }]}>Cotizaciones</Text>
+        </View>
+        <SkeletonList count={5} />
+      </View>
+    );
 
   return (
     <View style={[styles.container, { backgroundColor: colors.bg }]}>

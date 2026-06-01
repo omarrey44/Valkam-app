@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, TextInput, TextInputProps, TouchableOpacity, View } from 'react-native';
-import { font, radius, shadow } from '../lib/theme';
+import { colors, font, radius, shadow } from '../lib/theme';
 import { useTheme } from '../lib/themeContext';
 
 function Label({ label }: { label: string }) {
@@ -16,23 +16,25 @@ function Label({ label }: { label: string }) {
 }
 
 export function FieldIcon({
-  label, icon, iconTint, iconBg, ...props
+  label, icon, iconTint, iconBg, error, ...props
 }: TextInputProps & {
   label: string;
   icon: keyof typeof Ionicons.glyphMap;
   iconTint?: string;
   iconBg?: string;
+  error?: string | null;
 }) {
   const { colors } = useTheme();
   const tint = iconTint ?? colors.textMuted;
   const bg = iconBg ?? (colors.card === '#1E293B' ? '#2D3A4A' : '#EEF2F7');
   const multiline = props.multiline;
+  const borderColor = error ? colors.danger : colors.border;
   return (
     <View style={{ marginBottom: 16 }}>
       <Label label={label} />
-      <View style={[styles.field, multiline && styles.fieldMultiline, { backgroundColor: colors.card, borderColor: colors.border }]}>
-        <View style={[styles.tile, { backgroundColor: bg, borderRightColor: colors.border }, multiline && styles.tileTop]}>
-          <Ionicons name={icon} size={20} color={tint} />
+      <View style={[styles.field, multiline && styles.fieldMultiline, { backgroundColor: colors.card, borderColor }]}>
+        <View style={[styles.tile, { backgroundColor: bg, borderRightColor: borderColor }, multiline && styles.tileTop]}>
+          <Ionicons name={icon} size={20} color={error ? colors.danger : tint} />
         </View>
         <TextInput
           placeholderTextColor={colors.textFaint}
@@ -40,6 +42,7 @@ export function FieldIcon({
           {...props}
         />
       </View>
+      {!!error && <Text style={[styles.errorText, { color: colors.danger }]}>{error}</Text>}
     </View>
   );
 }
@@ -91,4 +94,5 @@ const styles = StyleSheet.create({
   input: { flex: 1, paddingHorizontal: 14, fontSize: 16, fontFamily: font.regular },
   inputMultiline: { paddingVertical: 14, textAlignVertical: 'top', height: '100%' },
   selectText: { flex: 1, paddingHorizontal: 14, fontSize: 16, fontFamily: font.regular },
+  errorText: { fontSize: 12, fontFamily: font.semibold, marginTop: -10, marginBottom: 4, marginLeft: 4 },
 });

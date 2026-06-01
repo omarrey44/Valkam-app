@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {
-  ActivityIndicator,
+  Alert,
   FlatList,
   Image,
   Linking,
@@ -13,6 +13,7 @@ import {
   View,
 } from 'react-native';
 import IconField from '../../components/IconField';
+import { SkeletonList } from '../../components/Skeleton';
 import { supabase } from '../../lib/supabase';
 import { colors, estadoClienteColor, font, radius, shadow, whatsappUrl } from '../../lib/theme';
 import { useTheme } from '../../lib/themeContext';
@@ -36,6 +37,16 @@ export default function Clientes() {
     }, [load])
   );
 
+  function confirmarEliminar(id: string, empresa: string) {
+    Alert.alert('Eliminar cliente', `¿Eliminar a "${empresa}"? No se puede deshacer.`, [
+      { text: 'Cancelar', style: 'cancel' },
+      { text: 'Eliminar', style: 'destructive', onPress: async () => {
+        await supabase.from('clientes').delete().eq('id', id);
+        load();
+      }},
+    ]);
+  }
+
   const filtered = data.filter((c) => {
     const s = q.toLowerCase();
     return (
@@ -47,8 +58,11 @@ export default function Clientes() {
 
   if (loading)
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color={colors.primary} />
+      <View style={[styles.container, { backgroundColor: colors.bg }]}>
+        <View style={[styles.topHeader, { backgroundColor: colors.bg }]}>
+          <Text style={[styles.topTitle, { color: colors.text }]}>Clientes</Text>
+        </View>
+        <SkeletonList count={6} />
       </View>
     );
 
@@ -86,6 +100,7 @@ export default function Clientes() {
             activeOpacity={0.85}
             style={[styles.card, { backgroundColor: colors.card }]}
             onPress={() => router.push(`/cliente/${item.id}`)}
+            onLongPress={() => confirmarEliminar(item.id, item.empresa)}
           >
             {item.logo_url ? (
               <Image source={{ uri: item.logo_url }} style={styles.avatar} />

@@ -1,13 +1,15 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useState } from 'react';
-import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useCallback, useState } from 'react';
+import { Alert, BackHandler, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useFocusEffect } from 'expo-router';
 import { FieldIcon } from './FieldIcon';
 import SegmentSelect from './SegmentSelect';
 import { supabase } from '../lib/supabase';
 import { pickAndUpload } from '../lib/upload';
 import { logActividad } from '../lib/actividad';
 import { formatPhone } from '../lib/phone';
+import { validateEmail, validateRequired } from '../lib/validation';
 import { Cliente } from '../lib/types';
 import { colors, estadoClienteColor, font, gradients, radius, shadow } from '../lib/theme';
 import { useTheme } from '../lib/themeContext';
@@ -41,9 +43,36 @@ export default function ClienteForm({
   const [f, setF] = useState<ClienteInput>({ ...empty, ...initial });
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [dirty, setDirty] = useState(false);
+  const [errors, setErrors] = useState<{ empresa?: string; correo?: string }>({});
+
+  useFocusEffect(
+    useCallback(() => {
+      const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+        if (!dirty) return false;
+        Alert.alert('¿Descartar cambios?', 'Tienes cambios sin guardar.', [
+          { text: 'Seguir editando', style: 'cancel' },
+          { text: 'Descartar', style: 'destructive', onPress: () => BackHandler.exitApp() },
+        ]);
+        return true;
+      });
+      return () => sub.remove();
+    }, [dirty])
+  );
 
   function set<K extends keyof ClienteInput>(k: K, v: ClienteInput[K]) {
+    setDirty(true);
     setF((prev) => ({ ...prev, [k]: v }));
+  }
+
+  function validateFields() {
+    const e: typeof errors = {};
+    const reqEmpresa = validateRequired(f.empresa, 'Empresa');
+    if (reqEmpresa) e.empresa = reqEmpresa;
+    const emailErr = validateEmail(f.correo_principal);
+    if (emailErr) e.correo = emailErr;
+    setErrors(e);
+    return Object.keys(e).length === 0;
   }
 
   async function pickLogo() {
@@ -60,10 +89,7 @@ export default function ClienteForm({
   }
 
   async function save() {
-    if (!f.empresa.trim() || !f.correo_principal.trim()) {
-      Alert.alert('Faltan datos', 'Empresa y correo principal son obligatorios.');
-      return;
-    }
+    if (!validateFields()) return;
     setLoading(true);
     if (clienteId) {
       const { error } = await supabase.from('clientes').update(f).eq('id', clienteId);
@@ -105,12 +131,12 @@ export default function ClienteForm({
         <Text style={[styles.logoHint, { color: colors.textMuted }]}>{uploading ? 'Subiendo…' : 'Toca para subir logo'}</Text>
       </TouchableOpacity>
 
-      <FieldIcon label="Empresa *" icon="business-outline" iconTint={colors.primaryBright} iconBg="#EAF1FE" value={f.empresa} onChangeText={(v) => set('empresa', v)} placeholder="Nombre de la empresa" />
+      <FieldIcon label="Empresa *" icon="business-outline" iconTint={colors.primaryBright} iconBg="#EAF1FE" value={f.empresa} onChangeText={(v) => set('empresa', v)} placeholder="Nombre de la empresa" error={errors.empresa} onBlur={() => setErrors(e => ({ ...e, empresa: validateRequired(f.empresa, 'Empresa') ?? undefined }))} />
       <FieldIcon label="Ingeniero (contacto)" icon="construct-outline" value={f.ingeniero ?? ''} onChangeText={(v) => set('ingeniero', v)} placeholder="Ingeniero a cargo" />
       <FieldIcon label="Solicitante" icon="person-outline" value={f.solicitante ?? ''} onChangeText={(v) => set('solicitante', v)} placeholder="Quien solicita" />
       <FieldIcon label="Nombre del proyecto" icon="briefcase-outline" value={f.nombre_proyecto ?? ''} onChangeText={(v) => set('nombre_proyecto', v)} placeholder="Proyecto" />
       <FieldIcon label="Descripción del proyecto" icon="create-outline" value={f.descripcion_proyecto ?? ''} onChangeText={(v) => set('descripcion_proyecto', v)} placeholder="Detalles del proyecto..." multiline />
-      <FieldIcon label="Correo principal *" icon="mail-outline" iconTint={colors.success} iconBg="#DCFCE7" value={f.correo_principal} onChangeText={(v) => set('correo_principal', v)} autoCapitalize="none" keyboardType="email-address" placeholder="correo@empresa.com" />
+      <FieldIcon label="Correo principal *" icon="mail-outline" iconTint={colors.success} iconBg="#DCFCE7" value={f.correo_principal} onChangeText={(v) => set('correo_principal', v)} autoCapitalize="none" keyboardType="email-address" placeholder="correo@empresa.com" error={errors.correo} onBlur={() => setErrors(e => ({ ...e, correo: validateEmail(f.correo_principal) ?? undefined }))} />
       <FieldIcon label="Correos adicionales" icon="mail-open-outline" value={f.correos_adicionales ?? ''} onChangeText={(v) => set('correos_adicionales', v)} autoCapitalize="none" placeholder="separados por coma" />
       <FieldIcon label="Teléfono" icon="call-outline" value={f.telefono ?? ''} onChangeText={(v) => set('telefono', formatPhone(v))} keyboardType="phone-pad" placeholder="(614) 000-0000" />
       <FieldIcon label="Dirección" icon="location-outline" value={f.direccion ?? ''} onChangeText={(v) => set('direccion', v)} placeholder="Calle, ciudad..." multiline />

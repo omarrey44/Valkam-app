@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import GradientCard from '../../components/GradientCard';
+import RoleGuard from '../../components/RoleGuard';
 import { useAuth } from '../../lib/auth';
 import { supabase } from '../../lib/supabase';
 import { colors, estadoProyectoColor, font, gradients, radius, shadow } from '../../lib/theme';
@@ -188,13 +189,15 @@ export default function Proyectos() {
           subtitle="Ver métricas"
           onPress={() => router.push('/dashboard')}
         />
-        <QuickTile
-          icon="cube-outline"
-          tint={colors.success}
-          title="Inventario"
-          subtitle="Ver existencias"
-          onPress={() => router.push('/inventario')}
-        />
+        <RoleGuard roles={['administrador', 'aprobador']}>
+          <QuickTile
+            icon="cube-outline"
+            tint={colors.success}
+            title="Inventario"
+            subtitle="Ver existencias"
+            onPress={() => router.push('/inventario')}
+          />
+        </RoleGuard>
       </View>
     </ScrollView>
   );
